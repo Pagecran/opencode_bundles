@@ -16,6 +16,7 @@ Use the comfortable tools first:
 
 - `teams_list_chats`
 - `teams_read_chat_messages`
+- `teams_create_chat`
 - `teams_send_chat_message`
 
 Only fall back to `teams_graph_request` for edge cases not covered by the high-level tools.
@@ -63,6 +64,11 @@ Call `teams_send_chat_message` with one of:
 - `chat_name`
 - `participant_name`
 
+Or create / reuse a chat directly with:
+
+- `participant_username`
+- `participant_usernames`
+
 Required:
 
 - `message`
@@ -70,6 +76,18 @@ Required:
 Optional:
 
 - `content_type` (`text` or `html`)
+- `chat_topic` for group chats created from `participant_usernames`
+
+### Create a chat
+
+Call `teams_create_chat` with:
+
+- `participant_username` for a direct chat
+- `participant_usernames` for a group chat
+
+Optional:
+
+- `chat_topic` for group chats
 
 ### Advanced fallback
 
@@ -84,4 +102,5 @@ teams_graph_request(method: "GET|POST|PATCH|DELETE", path: "/...", query: { ... 
 - Before sending a message, confirm the exact destination chat and the final message text.
 - Prefer `contentType: "html"` only when formatting matters; otherwise use `text`.
 - When listing chats, summarize the useful ones instead of dumping raw payloads.
-- Prefer `participant_name` for existing direct/group chats only; if no matching chat exists, explain that a chat id or an existing conversation is needed.
+- Prefer `participant_name` for existing chats discovered from Teams.
+- Use `participant_username` or `participant_usernames` only with real account identifiers such as UPN / sign-in name or user id, not display-name guesses.

@@ -672,7 +672,7 @@ async function listChatMembers(chatId: string, forceRefresh = false) {
 async function getChatSummaryFromRaw(chat: any, me: any, forceRefresh = false) {
   const members = (await listChatMembers(chat.id, forceRefresh)).map(summarizeChatMember)
   const memberLabels = uniqueNonEmpty(
-    members.flatMap((member) => [member.displayName, member.email])
+    members.flatMap((member: any) => [member.displayName, member.email])
   )
 
   return {
@@ -713,7 +713,7 @@ async function listChatSummaries(limit: number, forceRefresh = false) {
   })
 
   const chats = Array.isArray(result?.value) ? result.value : []
-  return Promise.all(chats.map((chat) => getChatSummaryFromRaw(chat, me, forceRefresh)))
+  return Promise.all(chats.map((chat: any) => getChatSummaryFromRaw(chat, me, forceRefresh)))
 }
 
 async function resolveChatReference(args: any) {
@@ -747,6 +747,97 @@ async function resolveChatReference(args: any) {
   return match
 }
 
+function getRequestedParticipantUsernames(args: any) {
+  return uniqueNonEmpty([
+    args.participant_username,
+    ...(Array.isArray(args.participant_usernames) ? args.participant_usernames : [])
+  ])
+}
+
+function buildUserBindUrl(userReference: string) {
+  return `${GRAPH_BASE_URL}/users/${encodePathSegment(userReference)}`
+}
+
+function buildChatMemberBinding(userReference: string) {
+  return {
+    "@odata.type": "#microsoft.graph.aadUserConversationMember",
+    roles: ["owner"],
+    "user@odata.bind": buildUserBindUrl(userReference)
+  }
+}
+
+async function createChatFromParticipants(args: any) {
+  const forceRefresh = Boolean(args.force_refresh)
+  const me = await getCurrentUser(forceRefresh)
+  const requestedParticipants = getRequestedParticipantUsernames(args)
+
+  if (requestedParticipants.length === 0) {
+    throw new Error(
+      "Provide participant_username or participant_usernames to create a new Teams chat."
+    )
+  }
+
+  const selfReferences = new Set(
+    uniqueNonEmpty([me.id, me.userPrincipalName, me.mail]).map((value: string) => normalizeMatchText(value))
+  )
+  const participants = requestedParticipants.filter(
+    (value: string) => !selfReferences.has(normalizeMatchText(value))
+  )
+
+  if (!me.id) {
+    throw new Error("Could not determine the authenticated user id for Teams chat creation.")
+  }
+
+  if (participants.length === 0) {
+    throw new Error(
+      "Provide at least one other participant username (UPN) or user id to create a chat."
+    )
+  }
+
+  if (participants.length === 1 && args.chat_topic) {
+    throw new Error("chat_topic is only supported when creating a group chat with multiple participants.")
+  }
+
+  const createdChat = await graphResult({
+    path: "/chats",
+    method: "POST",
+    body: {
+      chatType: participants.length === 1 ? "oneOnOne" : "group",
+      ...(participants.length > 1 && args.chat_topic ? { topic: args.chat_topic } : {}),
+      members: [buildChatMemberBinding(me.id), ...participants.map((value: string) => buildChatMemberBinding(value))]
+    },
+    force_refresh: forceRefresh
+  })
+
+  return {
+    chat: await getChatSummaryById(createdChat.id, forceRefresh),
+    requestedParticipants: participants
+  }
+}
+
+async function resolveChatForSending(args: any) {
+  const requestedParticipants = getRequestedParticipantUsernames(args)
+  const hasExistingChatReference = Boolean(args.chat_id || args.chat_name || args.participant_name)
+
+  if (hasExistingChatReference && requestedParticipants.length > 0) {
+    throw new Error(
+      "Use either chat_id/chat_name/participant_name for an existing chat, or participant_username/participant_usernames to create or reuse a chat by account."
+    )
+  }
+
+  if (hasExistingChatReference) {
+    return resolveChatReference(args)
+  }
+
+  if (requestedParticipants.length > 0) {
+    return (await createChatFromParticipants(args)).chat
+  }
+
+  throw new Error(
+    "Provide chat_id, chat_name, participant_name, participant_username or participant_usernames."
+  )
+}
+
 function summarizeTeam(team: any) {
   return {
     id: team?.id || null,
@@ -756,7 +847,7 @@ function summarizeTeam(team: any) {
   }
 }
 
-async function listTeams(forceRefresh = false) {
+async function listTeams(forceRefresh = false): Promise<any[]> {
   const result = await graphResult({
     path: "/me/joinedTeams",
     method: "GET",
@@ -770,7 +861,7 @@ async function resolveTeamReference(args: any) {
   const teams = await listTeams(Boolean(args.force_refresh))
 
   if (args.team_id) {
-    const exact = teams.find((team) => team.id === args.team_id)
+    const exact = teams.find((team: any) => team.id === args.team_id)
     if (exact) {
       return exact
     }
@@ -784,8 +875,8 @@ async function resolveTeamReference(args: any) {
 
   const match = chooseSingleMatch(
     teams,
-    (team) => scoreBestValue([team.displayName, team.description], args.team_name),
-    (team) => `${team.displayName} [${team.id}]`,
+    (team: any) => scoreBestValue([team.displayName, team.description], args.team_name),
+    (team: any) => `${team.displayName} [${team.id}]`,
     "team"
   )
 
@@ -809,19 +900,21 @@ function summarizeChannel(team: any, channel: any) {
   }
 }
 
-async function listChannelsForTeam(team: any, forceRefresh = false) {
+async function listChannelsForTeam(team: any, forceRefresh = false): Promise<any[]> {
   const result = await graphResult({
     path: `/teams/${encodePathSegment(team.id)}/channels`,
     method: "GET",
     force_refresh: forceRefresh
   })
 
-  return (Array.isArray(result?.value) ? result.value : []).map((channel) => summarizeChannel(team, channel))
+  return (Array.isArray(result?.value) ? result.value : []).map((channel: any) => summarizeChannel(team, channel))
 }
 
-async function listChannelsAcrossTeams(forceRefresh = false) {
+async function listChannelsAcrossTeams(forceRefresh = false): Promise<any[]> {
   const teams = await listTeams(forceRefresh)
-  const channelGroups = await Promise.all(teams.map((team) => listChannelsForTeam(team, forceRefresh)))
+  const channelGroups = await Promise.all(
+    teams.map((team: any) => listChannelsForTeam(team, forceRefresh))
+  )
   return channelGroups.flat()
 }
 
@@ -889,7 +982,7 @@ async function listChatMessages(args: any) {
 }
 
 async function sendChatMessage(args: any) {
-  const chat = await resolveChatReference(args)
+  const chat = await resolveChatForSending(args)
   const result = await graphResult({
     path: `/chats/${encodePathSegment(chat.id)}/messages`,
     method: "POST",
@@ -904,13 +997,22 @@ async function sendChatMessage(args: any) {
   }
 }
 
+async function createChat(args: any) {
+  const result = await createChatFromParticipants(args)
+  return {
+    ok: true,
+    chat: result.chat,
+    requestedParticipants: result.requestedParticipants
+  }
+}
+
 async function listChannels(args: any) {
   const forceRefresh = Boolean(args.force_refresh)
-  const channels = args.team_id || args.team_name
+  const channels: any[] = args.team_id || args.team_name
     ? await listChannelsForTeam(await resolveTeamReference(args), forceRefresh)
     : await listChannelsAcrossTeams(forceRefresh)
 
-  const filtered = filterAndSortMatches(channels, args.query, (channel) => [
+  const filtered = filterAndSortMatches(channels, args.query, (channel: any) => [
     channel.displayName,
     channel.description,
     channel.teamName
@@ -1155,17 +1257,35 @@ export const TeamsPlugin = async () => {
 
       teams_send_chat_message: tool({
         description:
-          "Send a chat message using chat_id, chat_name or participant_name instead of forcing raw Graph paths.",
+          "Send a chat message using an existing chat reference, or create/reuse a chat from participant usernames when needed.",
         args: {
           chat_id: tool.schema.string().optional(),
           chat_name: tool.schema.string().optional(),
           participant_name: tool.schema.string().optional(),
+          participant_username: tool.schema.string().optional(),
+          participant_usernames: stringArraySchema.optional(),
+          chat_topic: tool.schema.string().optional(),
           message: tool.schema.string(),
           content_type: tool.schema.string().optional(),
           force_refresh: tool.schema.boolean().optional()
         },
         async execute(args) {
           const result = await sendChatMessage(args)
+          return JSON.stringify(result, null, 2)
+        }
+      }),
+
+      teams_create_chat: tool({
+        description:
+          "Create or reuse a one-on-one or group chat from participant usernames (UPNs) or user ids.",
+        args: {
+          participant_username: tool.schema.string().optional(),
+          participant_usernames: stringArraySchema.optional(),
+          chat_topic: tool.schema.string().optional(),
+          force_refresh: tool.schema.boolean().optional()
+        },
+        async execute(args) {
+          const result = await createChat(args)
           return JSON.stringify(result, null, 2)
         }
       }),
@@ -1178,7 +1298,7 @@ export const TeamsPlugin = async () => {
         },
         async execute(args) {
           const teams = await listTeams(Boolean(args.force_refresh))
-          const filtered = filterAndSortMatches(teams, args.query, (team) => [
+          const filtered = filterAndSortMatches(teams, args.query, (team: any) => [
             team.displayName,
             team.description
           ])

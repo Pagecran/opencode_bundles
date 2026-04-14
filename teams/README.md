@@ -26,13 +26,14 @@ High-level:
 
 - `teams_list_chats`
 - `teams_read_chat_messages`
+- `teams_create_chat`
 - `teams_send_chat_message`
 - `teams_list_teams`
 - `teams_list_channels`
 - `teams_read_channel_messages`
 - `teams_send_channel_message`
 
-The high-level tools resolve chats, teams and channels by readable names whenever possible, so you do not have to work only with raw Graph ids.
+The high-level tools resolve chats, teams and channels by readable names whenever possible, and can also create one-on-one or group chats from usernames when needed, so you do not have to work only with raw Graph ids.
 
 ## Authentication
 
@@ -80,4 +81,11 @@ node .\package\bin\pagecran_teams_cli.mjs request GET /me
 2. Complete Microsoft login in the browser
 3. Confirm auth with `teams_auth_device_poll`
 4. Test connectivity with `teams_ping`
-5. Work comfortably with `teams_list_chats`, `teams_send_chat_message`, `teams_list_teams`, `teams_list_channels`, `teams_send_channel_message`
+5. Work comfortably with `teams_list_chats`, `teams_create_chat`, `teams_send_chat_message`, `teams_list_teams`, `teams_list_channels`, `teams_send_channel_message`
+
+## Creating chats by username
+
+- Use `teams_create_chat` with `participant_username` for a direct chat, or `participant_usernames` for a group chat
+- `participant_username` and `participant_usernames` expect account identifiers such as UPN / sign-in name or user id
+- Use `chat_topic` only for group chats
+- `teams_send_chat_message` also accepts the same participant fields and will create or reuse the target chat before sending
