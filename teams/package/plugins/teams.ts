@@ -575,7 +575,8 @@ function summarizeIdentity(identity: any) {
       type: "user",
       id: identity.user.id || null,
       displayName: identity.user.displayName || null,
-      userPrincipalName: identity.user.userIdentityType || null
+      userPrincipalName: null,
+      userIdentityType: identity.user.userIdentityType || null
     }
   }
 
