@@ -3,3 +3,5 @@ dist/
 *.log
 __pycache__/
 Thumbs.db
+**/Binaries/
+**/Intermediate/
