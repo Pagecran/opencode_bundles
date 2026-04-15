@@ -5,6 +5,8 @@ Monorepo source des bundles OpenCode Pagecran.
 ## Structure
 
 - `blender/` : bundle Blender actuel, autonome et publiable tel quel
+- `teams/` : bundle Teams / Microsoft Graph sans MCP
+- `unreal/` : bundle Unreal en cours de demarrage
 - `scripts/build_bundle.ps1` : staging local et publication sur le NAS
 - `dist/` : sortie generee localement
 
