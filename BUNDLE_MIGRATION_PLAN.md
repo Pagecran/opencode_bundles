@@ -18,7 +18,7 @@ Ordre recommande:
 2. Aligner skills, prerequis et execution bundle-side
 3. Migrer Blender vers ce modele
 4. Migrer Unreal vers ce modele
-5. Normaliser Teams sur la meme source de verite
+5. Normaliser Teams et M365 sur la meme source de verite
 
 Pourquoi commencer par les bundles eux-memes:
 
@@ -192,15 +192,15 @@ Raison:
 - le plugin n expose plus que des primitives techniques et stables
 - les changements du plugin Unreal deviennent exceptionnels malgre son mode de deploiement engine/fork
 
-## 6. Etape D - Teams
+## 6. Etape D - Teams et M365
 
 ### 6.1 Cible
 
-Faire respecter au bundle Teams la meme discipline de source de verite unique que pour Blender et Unreal, meme sans bridge hote.
+Faire respecter aux bundles Teams et M365 la meme discipline de source de verite unique que pour Blender et Unreal, meme sans bridge hote.
 
-### 6.2 Ce qui doit etre normalise cote bundle Teams
+### 6.2 Ce qui doit etre normalise cote bundles Teams et M365
 
-- registre unique des methodes Teams
+- registre unique des methodes Teams et M365
 - schemas d arguments et de retours
 - prerequis auth par methode
 - scopes et permissions associes aux operations
@@ -208,15 +208,15 @@ Faire respecter au bundle Teams la meme discipline de source de verite unique qu
 
 ### 6.3 Travaux recommandes
 
-- relier chaque methode Teams a ses scopes delegues attendus
+- relier chaque methode Teams ou M365 a ses scopes delegues attendus
 - distinguer clairement prerequis login, prerequis consentement et prerequis methode
-- verifier automatiquement que les skills Teams n annoncent pas de permissions absentes ou non gerees
+- verifier automatiquement que les skills Teams et M365 n annoncent pas de permissions absentes ou non gerees
 - garder les appels Graph derriere des methodes bundle stables quand c est possible
 
-### 6.4 Critere de sortie Teams
+### 6.4 Critere de sortie Teams et M365
 
 - les prerequis auth et permissions sont visibles dans la source de verite bundle-side
-- la doc Teams ne depend pas uniquement de connaissance implicite ou de configuration orale
+- la doc Teams et M365 ne depend pas uniquement de connaissance implicite ou de configuration orale
 
 ## 7. Etape E - skills et doc
 
@@ -246,7 +246,7 @@ Avant d ajouter un nouveau bundle host-backed, verifier:
 La migration peut etre consideree reussie quand:
 
 - Blender et Unreal ont un registre bundle-side pour les nouvelles methodes
-- Teams decrit ses prerequis auth et permissions dans la meme source de verite que ses methodes
+- Teams et M365 decrivent leurs prerequis auth et permissions dans la meme source de verite que leurs methodes
 - les bridges hotes sont reduits a des primitives stables
 - les skills sont alignees sur le catalogue reel
 - les nouvelles fonctionnalites ne forcent plus une double modification skill plus bridge
@@ -261,5 +261,5 @@ Les trois prochaines actions recommandees sont:
 
 Actions suivantes juste apres:
 
-1. Etendre le format de manifest aux prerequis auth et permissions Teams
+1. Etendre le format de manifest aux prerequis auth et permissions Teams et M365
 2. Verifier la coherence skills versus methodes pour les trois bundles

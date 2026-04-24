@@ -63,7 +63,7 @@ RFC associee: `RFC-0001-BUNDLE_ARCHITECTURE.md`
 - Eviter une skill qui annonce des methodes absentes
 - Eviter une methode qui depend d un prerequis non declare
 
-Pour un bundle hostless comme Teams, remplacer mentalement `bridge` par `provider/API`: la meme discipline de source de verite et d alignement doc/runtime s applique.
+Pour un bundle hostless comme Teams ou M365, remplacer mentalement `bridge` par `provider/API`: la meme discipline de source de verite et d alignement doc/runtime s applique.
 
 ## 8. Question de controle finale
 

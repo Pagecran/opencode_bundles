@@ -5,7 +5,7 @@ Monorepo source des bundles OpenCode Pagecran.
 ## Structure
 
 - `blender/` : bundle Blender actuel, autonome et publiable tel quel
-- `m365/` : bundle Microsoft 365 / Graph en squelette, axe SharePoint, fichiers et Excel
+- `m365/` : bundle Microsoft 365 / Graph, axe SharePoint, fichiers, Excel et Teams via Graph
 - `teams/` : bundle Teams / Microsoft Graph sans MCP
 - `unreal/` : bundle Unreal en cours de demarrage
 - `bridges/` : sources canoniques des bridges host-side, directement au premier niveau

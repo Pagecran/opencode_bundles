@@ -66,7 +66,7 @@ Tous les bundles ne se ressemblent pas. La specification distingue deux profils.
 
 ### 5.1 Bundle hostless
 
-Exemple: Teams / Microsoft Graph.
+Exemples: Teams / Microsoft Graph, Microsoft 365 / Graph.
 
 Dans ce cas:
 
@@ -465,17 +465,17 @@ Conclusion:
 - chaque changement du bridge a un cout de diffusion plus eleve qu un simple plugin projet
 - Unreal doit evoluer vers un bridge minimal + execution generique + workflows bundle-side
 
-### 20.3 Teams
+### 20.3 Teams et Microsoft 365
 
 Etat actuel:
 
-- bundle hostless
+- bundles hostless
 - les methodes peuvent rester directement dans le plugin OpenCode
 
 Conclusion:
 
-- Teams n a pas le meme probleme structurel
-- mais il doit tout de meme respecter la source de verite unique et des schemas coherents
+- Teams et M365 n ont pas le meme probleme structurel que Blender et Unreal
+- mais ils doivent tout de meme respecter la source de verite unique, des schemas coherents, et des prerequis auth/permissions explicites
 
 ## 21. Procedure pour ajouter une nouvelle methode
 

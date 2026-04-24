@@ -216,11 +216,11 @@ Decision locale:
 - implementer les workflows cote bundle pour eviter la recompilation systematique
 - traiter toute evolution du plugin Unreal comme une evolution a cout de diffusion eleve, donc a stabiliser tres en amont
 
-### 9.3 Teams
+### 9.3 Teams et Microsoft 365
 
 Constat:
 
-- bundle hostless
+- bundles hostless
 - pas de bridge dans une application tierce
 
 Decision locale:

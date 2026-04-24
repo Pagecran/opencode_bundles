@@ -278,7 +278,7 @@ Valeurs recommandees:
 }
 ```
 
-## 8. Exemple hostless Teams
+## 8. Exemple hostless Teams / M365
 
 ```json
 {
@@ -308,6 +308,7 @@ Valeurs recommandees:
 ```
 
 Ici, le point important est que les scopes et prerequis auth appartiennent au bundle, pas uniquement a la skill.
+Le meme principe vaut pour un bundle M365 plus large qui couvre sites, fichiers, Excel et Teams via Microsoft Graph.
 
 ## 9. Dispatcher bundle-side
 

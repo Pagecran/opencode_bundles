@@ -7,7 +7,7 @@ Last reviewed: 2026-04-22.
 ## Repo Overview
 
 - This is a small monorepo for Pagecran OpenCode bundles.
-- Primary bundle roots are `blender/`, `teams/`, and `unreal/`.
+- Primary bundle roots are `blender/`, `m365/`, `teams/`, and `unreal/`.
 - Canonical host-side bridge sources should live directly under `bridges/` at the repo root.
 - Shared packaging lives in `scripts/build_bundle.ps1`.
 - Local build output goes to `dist/`.
@@ -181,6 +181,7 @@ Last reviewed: 2026-04-22.
 - Read the bundle README before changing a bundle-specific plugin or skill.
 - For Blender and Unreal changes, inspect the transport layer, CLI, and relevant skill docs together.
 - For Teams changes, verify auth, Graph path handling, and fuzzy-resolution helpers together.
+- For Microsoft 365 changes, verify auth, Graph path handling, manifest coherence, and bundle runtime alignment together.
 - After TS edits, run `tsc --noEmit` for the touched bundle.
 - After CLI or protocol edits, run at least one smoke test command relevant to the changed path.
 - Avoid introducing large framework changes unless the repo already commits to them.
