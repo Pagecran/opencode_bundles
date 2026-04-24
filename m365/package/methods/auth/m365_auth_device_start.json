@@ -1,0 +1,40 @@
+{
+  "name": "m365_auth_device_start",
+  "domain": "auth",
+  "description": "Start Microsoft device-code authentication for Microsoft 365 and store a pending login locally.",
+  "kind": "hostless",
+  "args": {
+    "client_id": {
+      "type": "string",
+      "required": false
+    },
+    "tenant_id": {
+      "type": "string",
+      "required": false
+    },
+    "scopes": {
+      "type": "array",
+      "required": false,
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "returns": {
+    "type": "object"
+  },
+  "requires": {
+    "auth": false,
+    "env": [
+      "PAGECRAN_M365_CLIENT_ID or PAGECRAN_TEAMS_CLIENT_ID"
+    ]
+  },
+  "execution": {
+    "strategy": "direct_api",
+    "tool": "m365_auth_device_start"
+  },
+  "verify": {
+    "strategy": "none"
+  },
+  "risk": "write"
+}

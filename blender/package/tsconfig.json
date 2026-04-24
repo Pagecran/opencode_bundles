@@ -11,6 +11,8 @@
     ]
   },
   "include": [
-    "plugins/**/*.ts"
+    "plugins/**/*.ts",
+    "runtime/**/*.ts",
+    "methods/**/*.ts"
   ]
 }

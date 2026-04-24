@@ -5,6 +5,8 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { tool, type Plugin } from "@opencode-ai/plugin"
 
+import { dispatchBlenderMethod } from "../runtime/dispatcher"
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -413,7 +415,7 @@ async function destroySession(sessionID: string, host = DEFAULT_HOST, port = DEF
 // Core request helper — used by the single blender_request tool
 // ---------------------------------------------------------------------------
 
-async function requestBlender(options: {
+async function requestBlenderRaw(options: {
   context: any
   method: string
   params?: JsonObject
@@ -460,9 +462,9 @@ async function requestBlender(options: {
 // ---------------------------------------------------------------------------
 // Plugin — 6 tools instead of 60+
 //
-// All domain-specific Blender methods (create_object, get_scene_info, …)
-// are called through the generic `blender_request` tool.  The loaded skill
-// provides the method catalog so the LLM knows which methods + params exist.
+// All domain-specific Blender methods are called through the generic
+// `blender_request` tool. The bundle runtime now owns the method registry
+// and dispatches each method to a bridge primitive or host-side function.
 // ---------------------------------------------------------------------------
 
 const jsonRecordSchema = tool.schema.record(tool.schema.string(), tool.schema.any())
@@ -514,8 +516,8 @@ export const BlenderPlugin: Plugin = async () => {
 
       blender_request: tool({
         description:
-          "Send a command to the Blender bridge. " +
-          "The loaded skill provides the method catalog (method names and their parameters). " +
+          "Send a command to the Blender bundle runtime. " +
+          "Bundle-defined methods are dispatched through the OpenCode Blender Bridge. " +
           "If no skill is loaded, call with method 'get_capabilities' to discover available methods. " +
           "Screenshots and images are automatically saved to temp files.",
         args: {
@@ -527,13 +529,21 @@ export const BlenderPlugin: Plugin = async () => {
         },
         async execute(args, context) {
           const sessionID = normalizeSessionId(context)
-          const result = await requestBlender({
-            context,
+          const result = await dispatchBlenderMethod({
             method: args.method,
-            params: args.params || {},
+            params: (args.params || {}) as JsonObject,
             timeoutMs: args.timeout_ms,
             host: args.host,
-            port: args.port
+            port: args.port,
+            requestRaw: ({ method, params, timeoutMs, host, port }) =>
+              requestBlenderRaw({
+                context,
+                method,
+                params,
+                timeoutMs,
+                host,
+                port
+              })
           })
           return formatToolOutput(result, args.method, sessionID)
         }
@@ -646,7 +656,7 @@ export const BlenderPlugin: Plugin = async () => {
           const sessionID = normalizeSessionId(context)
           const host = resolveHost(args.host)
           const port = resolvePort(args.port)
-          const result = await requestBlender({
+          const result = await requestBlenderRaw({
             context,
             method: "ping",
             params: {},

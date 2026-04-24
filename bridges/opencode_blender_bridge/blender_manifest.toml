@@ -1,0 +1,15 @@
+schema_version = "1.0.0"
+
+id = "opencode_blender_bridge"
+name = "OpenCode Blender Bridge"
+version = "0.3.0"
+type = "add-on"
+tagline = "Minimal socket bridge for OpenCode bundle-side workflows"
+maintainer = "Studio Pagecran <contact@pagecran.com>"
+license = ["SPDX:GPL-3.0-or-later"]
+copyright = ["2025 Studio Pagecran"]
+tags = ["Interface"]
+blender_version_min = "5.0.0"
+
+[permissions]
+network = "Socket bridge for OpenWork and CLI communication"

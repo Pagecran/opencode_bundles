@@ -231,4 +231,4 @@ Capture the Shader Editor as PNG.
 - Prefer `create_material_and_assign` for standard materials — one call instead of three.
 - Inspect materials before editing them.
 - Specify either `material_name` or `group_name`, never both.
-- If the bridge is unreachable, tell the user to toggle **Pagecran > Pagecran Bridge** in Blender.
+- If the bridge is unreachable, tell the user to enable or reload **OpenCode Blender Bridge** in Blender.

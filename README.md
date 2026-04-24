@@ -5,8 +5,15 @@ Monorepo source des bundles OpenCode Pagecran.
 ## Structure
 
 - `blender/` : bundle Blender actuel, autonome et publiable tel quel
+- `m365/` : bundle Microsoft 365 / Graph en squelette, axe SharePoint, fichiers et Excel
 - `teams/` : bundle Teams / Microsoft Graph sans MCP
 - `unreal/` : bundle Unreal en cours de demarrage
+- `bridges/` : sources canoniques des bridges host-side, directement au premier niveau
+- `BUNDLE_SPEC.md` : specification d architecture a respecter pour les bundles OpenCode
+- `BUNDLE_RUNTIME_SPEC.md` : spec concrete de ce qui vit dans les bundles, manifests, runtime et prerequis
+- `RFC-0001-BUNDLE_ARCHITECTURE.md` : RFC de reference sur la separation bridge / bundle
+- `BUNDLE_CHECKLIST.md` : checklist courte de conception et de revue
+- `BUNDLE_MIGRATION_PLAN.md` : plan concret de migration Blender / Unreal
 - `scripts/build_bundle.ps1` : staging local et publication sur le NAS
 - `dist/` : sortie generee localement
 
@@ -57,7 +64,7 @@ Le meme layout est genere localement dans `dist/`, par exemple :
 
 ## Ajouter un nouveau bundle
 
-1. Creer un nouveau dossier a la racine, par ex. `teams/`
+1. Creer un nouveau dossier a la racine, par ex. `m365/`
 2. Ajouter son `bundle.json`
 3. Ajouter son `install.ps1` et son `package/`
-4. Lancer `.\scripts\build_bundle.ps1 -Bundle teams`
+4. Lancer `.\scripts\build_bundle.ps1 -Bundle m365`

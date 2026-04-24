@@ -17,7 +17,7 @@ All methods below are called via the `blender_request` tool:
 blender_request(method: "<method_name>", params: { ... })
 ```
 
-If the bridge is unreachable, tell the user to toggle **Pagecran > Pagecran Bridge** in Blender and verify the port in extension preferences.
+If the bridge is unreachable, tell the user to enable or reload **OpenCode Blender Bridge** in Blender and verify the port in extension preferences.
 
 ## Workflow
 
@@ -38,7 +38,7 @@ Health check. Returns bridge version and Blender info.
 
 ### `get_capabilities`
 
-Returns every registered bridge method with parameter signatures. Use this to discover methods not listed here.
+Returns every bundle-defined Blender method plus the currently reachable bridge capabilities. Use this to discover methods not listed here.
 
 **Params:** none
 

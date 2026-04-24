@@ -98,4 +98,4 @@ Start batch render for all enabled shots.
 - Read the shot before changing its frame range or enable state.
 - Set the render path before launching batch render.
 - Keep user-provided shot names exact.
-- If the bridge is unreachable, tell the user to toggle **Pagecran > Pagecran Bridge** in Blender.
+- If the bridge is unreachable, tell the user to enable or reload **OpenCode Blender Bridge** in Blender.

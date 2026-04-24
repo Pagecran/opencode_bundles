@@ -19,7 +19,7 @@ This bundle is aimed first at **linear animation and rendering workflows**, not 
        |
        |  6 tools (connect, disconnect, request, events, wait, ping)
        v
-  unreal.ts plugin  -- persistent TCP socket bridge connection
+  unreal.ts plugin  -- persistent TCP socket + bundle runtime dispatcher
        |
        v
   Pagecran Unreal bridge  -- Unreal plugin / editor module
@@ -32,8 +32,12 @@ The plugin exposes **6 generic tools**. Domain knowledge and workflow guidance l
 
 ## What is included
 
-- `package/plugins/unreal.ts` - plugin with persistent TCP bridge tools
-- `bridge_plugin/PagecranUnrealBridge/` - Unreal editor plugin scaffold for the bridge side
+- `package/plugins/unreal.ts` - plugin with persistent TCP bridge tools and bundle runtime dispatch
+- `package/runtime/*` - bundle-side runtime: dispatcher, registry, validation
+- `package/methods/*` - bundle-side Unreal method source of truth
+- `package/scripts/unreal/*` - bundle-side Unreal workflow scripts executed through `execute_python`
+- `package/scripts/opencode_unreal_bundle/*` - reusable Unreal Python helpers and migrated logic modules
+- `../bridges/opencode_unreal_bridge/` - Unreal editor plugin scaffold for the bridge side
 - `PROTOCOL.md` - JSON-over-TCP protocol and method catalog reference
 - `REFERENCE_MAP.md` - mapping from `ChiR24/Unreal_mcp` concepts to the Pagecran bundle model
 - `package/bin/pagecran_unreal_cli.mjs` - standalone CLI for bridge debugging and scripting
@@ -70,7 +74,7 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 The bundle expects an Unreal-side bridge plugin or editor module that speaks newline-delimited JSON over TCP.
 
-The included scaffold lives in `bridge_plugin/PagecranUnrealBridge/` and is meant to be copied into an Unreal project's `Plugins/` folder.
+The included scaffold lives in `bridges/opencode_unreal_bridge/` and is intended to ship with the Unreal fork / engine-side source, not as a per-project override.
 
 Recommended direction:
 
@@ -92,21 +96,30 @@ node .\package\bin\pagecran_unreal_cli.mjs endpoint --pretty
 node .\package\bin\pagecran_unreal_cli.mjs ping --pretty
 node .\package\bin\pagecran_unreal_cli.mjs capabilities --pretty
 node .\package\bin\pagecran_unreal_cli.mjs send get_capabilities --pretty
+node .\package\bin\pagecran_unreal_cli.mjs send execute_python --params-json '{"code":"print(123)"}' --pretty
 ```
+
+The standalone CLI talks directly to the minimal bridge. Bundle-defined Unreal workflows are exposed through `unreal_request` inside OpenCode.
 
 Current Unreal-side scaffold included in this bundle:
 
-- `bridge_plugin/PagecranUnrealBridge/README.md`
-- `bridge_plugin/PagecranUnrealBridge/PagecranUnrealBridge.uplugin`
+- `bridges/opencode_unreal_bridge/README.md`
+- `bridges/opencode_unreal_bridge/opencode_unreal_bridge.uplugin`
 
-Implemented bridge methods today:
+Bridge primitives today:
 
 - `ping`
 - `get_capabilities`
+- `execute_python`
 - `get_project_info`
 - `get_editor_state`
+
+Bundle-defined methods currently migrated on top of `execute_python`:
+
+- `load_level`
 - `list_level_sequences`
 - `get_sequence_info`
+- `open_level_sequence`
 - `add_track`
 - `set_keyframe`
 - `add_camera_cut`
@@ -133,6 +146,11 @@ Planned method families already declared in the bridge capability catalog:
 - Data Layers
 - ACEScg / rendering
 - shading / materials / lookdev
+
+Practical rule:
+
+- if a method appears in the bridge primitive list, it lives in `bridges/opencode_unreal_bridge/`
+- if a method appears in the bundle-defined list, it lives in `unreal/package/methods/` plus `unreal/package/scripts/`
 
 ## Environment
 

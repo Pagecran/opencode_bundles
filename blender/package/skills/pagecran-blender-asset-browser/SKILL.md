@@ -161,7 +161,7 @@ Import an object/collection from a library and build a scatter GN setup on a sur
 - Read asset metadata before importing or clearing.
 - Prefer `apply_library_material_to_object` or `scatter_library_asset_on_surface` when the goal is import-and-use in one step.
 - Keep library-relative file paths exact.
-- If the bridge is unreachable, tell the user to toggle **Pagecran > Pagecran Bridge** in Blender.
+- If the bridge is unreachable, tell the user to enable or reload **OpenCode Blender Bridge** in Blender.
 
 ---
 

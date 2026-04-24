@@ -11,13 +11,13 @@ Deployed to `C:\Users\<user>\.config\opencode\` — available from any repo.
        |
        |  6 tools (blender_request, connect, disconnect, events, ping)
        v
-  blender.ts plugin  ──  persistent TCP socket, newline-delimited JSON
+  blender.ts plugin  ──  persistent TCP socket + bundle runtime dispatcher
        |
        v
-  pagecran_bridge  ──  Blender extension (addon)
-       |
-       v
-  Blender Python API (bpy)
+  opencode_blender_bridge  ──  Blender extension (addon)
+        |
+        v
+   Blender Python API (bpy)
 ```
 
 The plugin exposes **6 generic tools**. Domain knowledge (method names, parameters, workflows) lives in **skills** that are loaded on-demand, keeping the base token cost minimal.
@@ -26,7 +26,10 @@ The plugin exposes **6 generic tools**. Domain knowledge (method names, paramete
 
 | Path | Role |
 |------|------|
-| `package/plugins/blender.ts` | Plugin: persistent socket, 6 tools, JSONL request logging |
+| `package/plugins/blender.ts` | Plugin: persistent socket, bundle runtime dispatcher, JSONL request logging |
+| `package/runtime/*` | Bundle-side runtime: dispatcher, registry, validation |
+| `package/methods/*` | Bundle-side method source of truth |
+| `package/scripts/blender/*` | Bundle-side Blender workflow scripts executed through `execute_code` |
 | `package/skills/*/SKILL.md` | 9 domain skills with method catalogs and guardrails |
 | `package/bin/pagecran_blender_cli.py` | Standalone Python CLI for manual/scripted bridge access |
 | `install.ps1` | Installer that deploys the bundle into the global OpenCode config |
@@ -67,10 +70,10 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 ## Blender side
 
-The backend is the `pagecran_bridge` extension:
+The backend is the `opencode_blender_bridge` extension:
 
 - No sidebar panel needed.
-- Toggle via **Pagecran > Pagecran Bridge** in Blender.
+- Enable or reload **OpenCode Blender Bridge** in Blender.
 - Socket port is configured in the extension preferences.
 
 ## Request logging
@@ -85,10 +88,12 @@ This log enables future analysis of usage patterns, error rates, and workflow op
 
 ## CLI (standalone)
 
-The Python CLI can be used independently for debugging or scripting:
+The Python CLI talks directly to the minimal bridge, so it is best suited for low-level debugging:
 
 ```powershell
 python "$env:USERPROFILE\.config\opencode\bin\pagecran_blender_cli.py" ping --pretty
-python "$env:USERPROFILE\.config\opencode\bin\pagecran_blender_cli.py" send get_scene_info --pretty
-python "$env:USERPROFILE\.config\opencode\bin\pagecran_blender_cli.py" send create_object --params-json '{"primitive":"CUBE"}' --pretty
+python "$env:USERPROFILE\.config\opencode\bin\pagecran_blender_cli.py" send get_capabilities --pretty
+python "$env:USERPROFILE\.config\opencode\bin\pagecran_blender_cli.py" send execute_code --params-json '{"code":"print(123)"}' --pretty
 ```
+
+Bundle-defined scene, shader, asset, and workflow methods are exposed through `blender_request` inside OpenCode, not as direct bridge commands.

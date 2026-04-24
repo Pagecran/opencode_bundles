@@ -5,6 +5,9 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { tool, type Plugin } from "@opencode-ai/plugin"
 
+import { dispatchUnrealMethod } from "../runtime/dispatcher"
+import type { JsonObject as RuntimeJsonObject } from "../runtime/types"
+
 type JsonObject = Record<string, any>
 
 type PendingRequest = {
@@ -385,7 +388,7 @@ async function destroySession(sessionID: string, host = DEFAULT_HOST, port = DEF
   return true
 }
 
-async function requestUnreal(options: {
+async function requestUnrealRaw(options: {
   context: any
   method: string
   params?: JsonObject
@@ -478,7 +481,7 @@ export const UnrealPlugin: Plugin = async () => {
 
       unreal_request: tool({
         description:
-          "Send a command to the Unreal bridge. The loaded skill provides the method catalog. If no skill is loaded, call with method 'get_capabilities' to discover available methods.",
+          "Send a command to the Unreal bundle runtime. Bundle-defined methods are dispatched through the Unreal bridge. If no skill is loaded, call with method 'get_capabilities' to discover available methods.",
         args: {
           method: tool.schema.string(),
           params: jsonRecordSchema.optional(),
@@ -488,13 +491,21 @@ export const UnrealPlugin: Plugin = async () => {
         },
         async execute(args, context) {
           const sessionID = normalizeSessionId(context)
-          const result = await requestUnreal({
-            context,
+          const result = await dispatchUnrealMethod({
             method: args.method,
-            params: args.params || {},
+            params: (args.params || {}) as RuntimeJsonObject,
             timeoutMs: args.timeout_ms,
             host: args.host,
-            port: args.port
+            port: args.port,
+            requestRaw: ({ method, params, timeoutMs, host, port }) =>
+              requestUnrealRaw({
+                context,
+                method,
+                params: params as JsonObject,
+                timeoutMs,
+                host,
+                port
+              })
           })
           return formatToolOutput(result, args.method, sessionID)
         }
@@ -611,7 +622,7 @@ export const UnrealPlugin: Plugin = async () => {
           const sessionID = normalizeSessionId(context)
           const host = resolveHost(args.host)
           const port = resolvePort(args.port)
-          const result = await requestUnreal({
+          const result = await requestUnrealRaw({
             context,
             method: "ping",
             params: {},

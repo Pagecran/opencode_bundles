@@ -58,14 +58,20 @@ The goal is to keep the transport small and stable, then evolve the method catal
 }
 ```
 
-## Implemented methods now
+## Bridge primitives now
 
 - `ping`
 - `get_capabilities`
+- `execute_python`
 - `get_project_info`
 - `get_editor_state`
+
+## Bundle-defined methods currently implemented on top of `execute_python`
+
+- `load_level`
 - `list_level_sequences`
 - `get_sequence_info`
+- `open_level_sequence`
 - `add_track`
 - `set_keyframe`
 - `add_camera_cut`
@@ -84,10 +90,17 @@ The goal is to keep the transport small and stable, then evolve the method catal
 - `set_data_layer_loaded`
 - `set_data_layer_visible`
 
+Interpretation:
+
+- bridge primitives are implemented in `bridges/opencode_unreal_bridge/`
+- bundle-defined methods are implemented in `unreal/package/methods/` and `unreal/package/scripts/`
+
 ## Planned methods by domain
 
 ### Core / editor
 
+- `execute_python`
+- `load_level`
 - `get_viewport_screenshot`
 
 ### Sequencer
@@ -182,3 +195,5 @@ Current implemented subset:
 - Methods should prefer exact asset paths and stable identifiers over fuzzy display names.
 - Sequencer, Movie Render Graph, USD, Data Layers, shading, and render setup are the highest-priority domains.
 - The bridge should stay editor-focused and linear-rendering-focused, not gameplay-focused.
+- The bridge should expose stable primitives like `execute_python`; bundle-side runtimes should own workflow composition.
+- Bundle-side Unreal runtime currently implements level loading, sequencer reads/writes, movie render graph reads/configure/render, core shading reads/writes, and data-layer reads/writes on top of `execute_python`.

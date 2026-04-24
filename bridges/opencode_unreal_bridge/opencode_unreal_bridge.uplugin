@@ -1,0 +1,26 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "0.2.0",
+  "FriendlyName": "OpenCode Unreal Bridge",
+  "Description": "TCP JSON bridge for the OpenCode Unreal bundle, focused on linear animation and rendering workflows.",
+  "Category": "Scripting",
+  "CreatedBy": "Pagecran",
+  "CanContainContent": false,
+  "IsBetaVersion": true,
+  "IsExperimentalVersion": true,
+  "Installed": false,
+  "Plugins": [
+    {
+      "Name": "MovieRenderPipeline",
+      "Enabled": true
+    }
+  ],
+  "Modules": [
+    {
+      "Name": "OpenCodeUnrealBridge",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    }
+  ]
+}
