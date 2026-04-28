@@ -8,7 +8,9 @@ Last reviewed: 2026-04-22.
 
 - This is a small monorepo for Pagecran OpenCode bundles.
 - Primary bundle roots are `blender/`, `m365/`, `teams/`, and `unreal/`.
+- Architecture guidance lives in `ARCHITECTURE.md`; authoring guidance lives in `BUNDLE_AUTHORING.md`.
 - Canonical host-side bridge sources should live directly under `bridges/` at the repo root.
+- Shared runtime source lives in `packages/bundle-runtime/src` and is vendored into each active bundle under `package/_runtime`.
 - Shared packaging lives in `scripts/build_bundle.ps1`.
 - Local build output goes to `dist/`.
 - Each bundle follows the same shape: `bundle.json`, `install.ps1`, `README.md`, `package/`.
@@ -30,9 +32,13 @@ Last reviewed: 2026-04-22.
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle unreal -SkipPublish`
 - Build all bundles locally without publishing:
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle all -SkipPublish`
+  - `-Bundle all` excludes deprecated bundles such as `teams`; build them explicitly if needed.
 - Build and publish a bundle to the default NAS target:
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle blender`
 - The build script stages `dist/<bundle>/<version>` and excludes `.git`, `.codenomad`, `dist`, `package\node_modules`, and Python `__pycache__`.
+- Verify vendored runtime copies are in sync:
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\sync_runtime.ps1 -CheckOnly`
+  - from `packages\bundle-runtime\`: `bun run runtime:sync-check`
 
 ## Install Commands
 
@@ -63,6 +69,10 @@ Last reviewed: 2026-04-22.
 - Microsoft 365 bundle coherence check:
   - from `m365\package\`: `bun run check:bundle`
   - root-relative: `bun --cwd .\m365\package run check:bundle`
+- Blender bundle coherence check:
+  - root-relative: `bun --cwd .\blender\package run check:bundle`
+- Unreal bundle coherence check:
+  - root-relative: `bun --cwd .\unreal\package run check:bundle`
 - The checked-in TS configs include the bundle runtime for bundles that have started the manifest-driven migration.
 - If you change CLI JS/MJS or Python files, do a manual smoke test because TS will not cover them.
 
@@ -177,7 +187,7 @@ Last reviewed: 2026-04-22.
 
 ## Practical Agent Workflow
 
-- Read `BUNDLE_RUNTIME_SPEC.md` before making bundle-architecture changes.
+- Read `ARCHITECTURE.md` and `BUNDLE_AUTHORING.md` before making bundle-architecture changes.
 - Read the bundle README before changing a bundle-specific plugin or skill.
 - For Blender and Unreal changes, inspect the transport layer, CLI, and relevant skill docs together.
 - For Teams changes, verify auth, Graph path handling, and fuzzy-resolution helpers together.
