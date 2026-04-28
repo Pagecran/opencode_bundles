@@ -1,0 +1,18 @@
+{
+  "name": "list_current_file_assets",
+  "domain": "assets",
+  "description": "List current file assets.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_assets",
+    "function": "list_current_file_assets"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

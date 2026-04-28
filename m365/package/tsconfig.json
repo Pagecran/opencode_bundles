@@ -6,12 +6,14 @@
     "strict": true,
     "skipLibCheck": true,
     "verbatimModuleSyntax": true,
+    "esModuleInterop": true,
     "types": [
       "node"
     ]
   },
   "include": [
     "plugins/**/*.ts",
-    "runtime/**/*.ts"
+    "runtime/**/*.ts",
+    "_runtime/**/*.ts"
   ]
 }

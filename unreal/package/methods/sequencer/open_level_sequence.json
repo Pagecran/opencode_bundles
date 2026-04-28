@@ -1,0 +1,16 @@
+{
+  "name": "open_level_sequence",
+  "domain": "sequencer",
+  "description": "Open a Level Sequence asset in the Sequencer editor.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/editor/open_level_sequence.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

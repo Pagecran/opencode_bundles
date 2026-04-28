@@ -1,0 +1,16 @@
+{
+  "name": "execute_code",
+  "domain": "core",
+  "description": "Execute arbitrary Python code inside Blender.",
+  "kind": "host-backed",
+  "risk": "destructive",
+  "execution": {
+    "strategy": "bridge_method",
+    "method": "execute_code"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

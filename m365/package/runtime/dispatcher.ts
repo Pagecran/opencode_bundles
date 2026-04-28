@@ -7,15 +7,30 @@ import {
 } from "./excel"
 import { executeGraphRequest, pingGraph } from "./graph"
 import {
+  createDriveFolder,
   createShareLink,
+  deleteDriveItem,
+  downloadDriveItem,
   getDriveItem,
   listDocumentLibraries,
   listDriveItems,
   listFileVersions,
   listSites,
-  resolveSiteReference
+  resolveSiteReference,
+  searchDriveItems,
+  updateDriveItem,
+  uploadSmallDriveItem
 } from "./m365"
-import { getMethodManifest, listMethodManifests, type MethodManifest } from "./method_registry"
+import { getMethodManifest, listMethodManifests } from "./method_registry"
+import type { MethodManifest } from "../_runtime/types"
+import { validateAndNormalizeArgs } from "../_runtime/manifest_args"
+import { batchDriveItems, notify, searchWorkspace } from "./openwork"
+import {
+  getMailboxSettings,
+  searchMailMessages,
+  sendMailMessage,
+  setAutomaticReplies
+} from "./outlook"
 import {
   createChat,
   listChannels,
@@ -37,7 +52,6 @@ import {
   pollForDeviceToken,
   startDeviceCode
 } from "./auth"
-import { validateAndNormalizeArgs } from "./manifest_args"
 
 type HandlerArgs = Record<string, unknown>
 type MethodHandler = (args: HandlerArgs) => Promise<unknown>
@@ -53,7 +67,11 @@ const REQUIRED_SCOPE_EQUIVALENTS: Record<string, string[]> = {
   "chat.read": ["Chat.Read", "Chat.ReadWrite"],
   "chat.readwrite": ["Chat.ReadWrite"],
   "channelmessage.send": ["ChannelMessage.Send"],
-  "channelmessage.read.all": ["ChannelMessage.Read.All"]
+  "channelmessage.read.all": ["ChannelMessage.Read.All"],
+  "mail.read": ["Mail.Read", "Mail.ReadWrite"],
+  "mail.send": ["Mail.Send"],
+  "mailboxsettings.read": ["MailboxSettings.Read", "MailboxSettings.ReadWrite"],
+  "mailboxsettings.readwrite": ["MailboxSettings.ReadWrite"]
 }
 
 const METHOD_HANDLERS: Record<string, MethodHandler> = {
@@ -141,6 +159,45 @@ const METHOD_HANDLERS: Record<string, MethodHandler> = {
   },
   async m365_create_share_link(args) {
     return createShareLink(args as Parameters<typeof createShareLink>[0])
+  },
+  async m365_search_drive_items(args) {
+    return searchDriveItems(args as Parameters<typeof searchDriveItems>[0])
+  },
+  async m365_create_drive_folder(args) {
+    return createDriveFolder(args as Parameters<typeof createDriveFolder>[0])
+  },
+  async m365_download_drive_item(args) {
+    return downloadDriveItem(args as Parameters<typeof downloadDriveItem>[0])
+  },
+  async m365_upload_small_drive_item(args) {
+    return uploadSmallDriveItem(args as Parameters<typeof uploadSmallDriveItem>[0])
+  },
+  async m365_update_drive_item(args) {
+    return updateDriveItem(args as Parameters<typeof updateDriveItem>[0])
+  },
+  async m365_delete_drive_item(args) {
+    return deleteDriveItem(args as Parameters<typeof deleteDriveItem>[0])
+  },
+  async m365_search_workspace(args) {
+    return searchWorkspace(args as Parameters<typeof searchWorkspace>[0])
+  },
+  async m365_batch_drive_items(args) {
+    return batchDriveItems(args as Parameters<typeof batchDriveItems>[0])
+  },
+  async m365_notify(args) {
+    return notify(args as Parameters<typeof notify>[0])
+  },
+  async m365_mail_search_messages(args) {
+    return searchMailMessages(args as Parameters<typeof searchMailMessages>[0])
+  },
+  async m365_mail_send_message(args) {
+    return sendMailMessage(args as Parameters<typeof sendMailMessage>[0])
+  },
+  async m365_mail_get_mailbox_settings(args) {
+    return getMailboxSettings(args as Parameters<typeof getMailboxSettings>[0])
+  },
+  async m365_mail_set_automatic_replies(args) {
+    return setAutomaticReplies(args as Parameters<typeof setAutomaticReplies>[0])
   },
   async m365_excel_list_worksheets(args) {
     return listWorkbookWorksheets(args as Parameters<typeof listWorkbookWorksheets>[0])

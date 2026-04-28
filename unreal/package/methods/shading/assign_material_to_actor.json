@@ -1,0 +1,16 @@
+{
+  "name": "assign_material_to_actor",
+  "domain": "shading",
+  "description": "Assign a material to an actor component slot.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/shading/assign_material_to_actor.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

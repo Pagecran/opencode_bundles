@@ -1,0 +1,16 @@
+{
+  "name": "create_material_instance",
+  "domain": "shading",
+  "description": "Create a material instance from a parent material.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/shading/create_material_instance.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

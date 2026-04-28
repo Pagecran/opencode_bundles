@@ -6,9 +6,7 @@ This bundle is aimed first at **linear animation and rendering workflows**, not 
 
 - Sequencer and shot workflows
 - Movie Render Graph and Movie Render Queue workflows
-- USD Stage Editor workflows
 - Data Layers driven scene organization
-- ACEScg project / viewport / render setup
 - shading, materials, lookdev, and render-facing material control
 - sequence rendering from Unreal
 
@@ -25,7 +23,7 @@ This bundle is aimed first at **linear animation and rendering workflows**, not 
   Pagecran Unreal bridge  -- Unreal plugin / editor module
        |
        v
-  Unreal Editor APIs (Sequencer, MRG, USD, Data Layers, shading, color pipeline, LiveLink)
+  Unreal Editor APIs (Sequencer, MRG, Data Layers, shading, LiveLink)
 ```
 
 The plugin exposes **6 generic tools**. Domain knowledge and workflow guidance live in **skills** loaded on demand, following the same model as the Blender bundle.
@@ -58,9 +56,7 @@ The plugin exposes **6 generic tools**. Domain knowledge and workflow guidance l
 - `pagecran-unreal-editor` - general editor / project inspection
 - `pagecran-unreal-sequencer` - Level Sequence, shots, bindings, keyframes, renders
 - `pagecran-unreal-movie-render-graph` - render graph assets, jobs, and graph-driven renders
-- `pagecran-unreal-usd-stage` - USD Stage Editor workflows
 - `pagecran-unreal-data-layers` - Data Layers and layer state control
-- `pagecran-unreal-rendering` - ACEScg, viewport setup, Movie Render Queue and sequence rendering
 - `pagecran-unreal-shading` - materials, instances, parameters, assignment, and lookdev
 
 ## Install
@@ -83,10 +79,8 @@ Recommended direction:
 - build the actual workflows on top of Unreal's own systems:
   - Sequencer / Level Sequence
   - Movie Render Graph / Movie Render Queue
-  - USD Stage Editor
   - Data Layers / World Partition tooling
   - shading and material workflows
-  - color pipeline and ACEScg-related project settings
   - LiveLink when realtime ingest or stream-based workflows are needed
 
 ## CLI (standalone)
@@ -142,9 +136,7 @@ Planned method families already declared in the bridge capability catalog:
 
 - Sequencer
 - Movie Render Graph / Movie Render Queue
-- USD Stage Editor
 - Data Layers
-- ACEScg / rendering
 - shading / materials / lookdev
 
 Practical rule:

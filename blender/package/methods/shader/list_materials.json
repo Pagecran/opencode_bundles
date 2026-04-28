@@ -1,0 +1,18 @@
+{
+  "name": "list_materials",
+  "domain": "shader",
+  "description": "List materials.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_shader",
+    "function": "list_materials"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "render_sequence_with_graph",
+  "domain": "movie_render_graph",
+  "description": "Render a sequence through Movie Render Graph.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/movie_render_graph/render_sequence_with_graph.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

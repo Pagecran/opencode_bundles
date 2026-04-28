@@ -1,0 +1,16 @@
+{
+  "name": "get_capabilities",
+  "domain": "core",
+  "description": "Return the method catalog exposed by the bridge.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "bridge_method",
+    "method": "get_capabilities"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "get_capabilities"
+    ]
+  }
+}

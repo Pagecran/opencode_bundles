@@ -1,0 +1,18 @@
+{
+  "name": "create_turntable_animation",
+  "domain": "animation",
+  "description": "Create turntable animation.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_animation",
+    "function": "create_turntable_animation"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

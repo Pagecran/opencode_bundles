@@ -1,0 +1,18 @@
+{
+  "name": "rename_geometry_node",
+  "domain": "geometry_nodes",
+  "description": "Rename geometry node.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_geometry_nodes",
+    "function": "rename_geometry_node"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

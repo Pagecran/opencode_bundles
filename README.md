@@ -6,15 +6,15 @@ Monorepo source des bundles OpenCode Pagecran.
 
 - `blender/` : bundle Blender actuel, autonome et publiable tel quel
 - `m365/` : bundle Microsoft 365 / Graph, axe SharePoint, fichiers, Excel et Teams via Graph
-- `teams/` : bundle Teams / Microsoft Graph sans MCP
-- `unreal/` : bundle Unreal en cours de demarrage
+- `teams/` : bundle Teams / Microsoft Graph deprecie, remplace par `m365/`
+- `unreal/` : bundle Unreal
 - `bridges/` : sources canoniques des bridges host-side, directement au premier niveau
-- `BUNDLE_SPEC.md` : specification d architecture a respecter pour les bundles OpenCode
-- `BUNDLE_RUNTIME_SPEC.md` : spec concrete de ce qui vit dans les bundles, manifests, runtime et prerequis
-- `RFC-0001-BUNDLE_ARCHITECTURE.md` : RFC de reference sur la separation bridge / bundle
-- `BUNDLE_CHECKLIST.md` : checklist courte de conception et de revue
-- `BUNDLE_MIGRATION_PLAN.md` : plan concret de migration Blender / Unreal
+- `packages/bundle-runtime/` : runtime TypeScript partage, synchronise dans les bundles
+- `ARCHITECTURE.md` : architecture canonique thin bridge / thick bundle
+- `BUNDLE_AUTHORING.md` : guide operationnel pour ajouter ou modifier des bundles et methodes
+- `docs/archive/` : anciennes specs conservees pour reference historique
 - `scripts/build_bundle.ps1` : staging local et publication sur le NAS
+- `scripts/sync_runtime.ps1` : synchronisation et verification des copies `_runtime/`
 - `dist/` : sortie generee localement
 
 ## Convention d un bundle
@@ -46,8 +46,14 @@ Set-ExecutionPolicy -Scope Process Bypass
 # build local uniquement
 .\scripts\build_bundle.ps1 -Bundle blender -SkipPublish
 
-# tous les bundles du monorepo
+# tous les bundles non deprecies du monorepo
 .\scripts\build_bundle.ps1 -Bundle all
+
+# bundle Teams deprecie, build explicite seulement
+.\scripts\build_bundle.ps1 -Bundle teams -SkipPublish
+
+# verifier que les copies vendored du runtime partage sont a jour
+.\scripts\sync_runtime.ps1 -CheckOnly
 ```
 
 Publication par defaut vers :
@@ -68,3 +74,5 @@ Le meme layout est genere localement dans `dist/`, par exemple :
 2. Ajouter son `bundle.json`
 3. Ajouter son `install.ps1` et son `package/`
 4. Lancer `.\scripts\build_bundle.ps1 -Bundle m365`
+
+Voir `ARCHITECTURE.md` et `BUNDLE_AUTHORING.md` pour les conventions completes.

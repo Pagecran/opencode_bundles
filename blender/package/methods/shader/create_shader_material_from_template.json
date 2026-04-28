@@ -1,0 +1,18 @@
+{
+  "name": "create_shader_material_from_template",
+  "domain": "shader",
+  "description": "Create shader material from template.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_shader",
+    "function": "create_shader_material_from_template"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

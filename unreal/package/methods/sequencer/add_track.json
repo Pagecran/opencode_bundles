@@ -1,0 +1,16 @@
+{
+  "name": "add_track",
+  "domain": "sequencer",
+  "description": "Add a Sequencer track to a sequence or binding.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/sequencer/add_track.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "list_materials",
+  "domain": "shading",
+  "description": "List material and material instance assets.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/shading/list_materials.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

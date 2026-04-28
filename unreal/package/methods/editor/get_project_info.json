@@ -1,0 +1,16 @@
+{
+  "name": "get_project_info",
+  "domain": "editor",
+  "description": "Read Unreal project metadata and active plugin state.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "bridge_method",
+    "method": "get_project_info"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "get_project_info"
+    ]
+  }
+}

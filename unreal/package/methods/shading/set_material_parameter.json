@@ -1,0 +1,16 @@
+{
+  "name": "set_material_parameter",
+  "domain": "shading",
+  "description": "Set scalar, vector, or texture parameters on a material instance.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/shading/set_material_parameter.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

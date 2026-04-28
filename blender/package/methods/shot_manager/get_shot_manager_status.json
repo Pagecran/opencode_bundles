@@ -1,0 +1,18 @@
+{
+  "name": "get_shot_manager_status",
+  "domain": "shot_manager",
+  "description": "Get shot manager status.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_shot_manager",
+    "function": "get_shot_manager_status"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

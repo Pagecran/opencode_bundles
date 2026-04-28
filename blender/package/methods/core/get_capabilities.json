@@ -1,0 +1,16 @@
+{
+  "name": "get_capabilities",
+  "domain": "core",
+  "description": "Return bundle-defined Blender methods and current bridge capabilities.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "bridge_method",
+    "method": "get_capabilities"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "get_capabilities"
+    ]
+  }
+}

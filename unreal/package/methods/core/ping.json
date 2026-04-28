@@ -1,0 +1,16 @@
+{
+  "name": "ping",
+  "domain": "core",
+  "description": "Health check for the Pagecran Unreal bridge.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "bridge_method",
+    "method": "ping"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "ping"
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 import { isRecord, type JsonRecord } from "./auth"
-import { graphResult } from "./graph"
+import { downloadGraphBytes, executeGraphRawRequest, graphResult } from "./graph"
 import {
   chooseSingleMatch,
   clampPositiveInt,
@@ -11,6 +11,9 @@ const DEFAULT_SITE_LIST_LIMIT = 20
 const DEFAULT_LIBRARY_LIST_LIMIT = 50
 const DEFAULT_ITEM_LIST_LIMIT = 100
 const DEFAULT_VERSION_LIST_LIMIT = 20
+const DEFAULT_DOWNLOAD_MAX_BYTES = 5 * 1024 * 1024
+const MAX_DOWNLOAD_BYTES = 25 * 1024 * 1024
+const MAX_SIMPLE_UPLOAD_BYTES = 4 * 1024 * 1024
 
 export type SiteSummary = {
   id: string | null,
@@ -106,8 +109,23 @@ type DriveItemReferenceArgs = DriveReferenceArgs & {
   force_refresh?: boolean
 }
 
+type DriveContainerReferenceArgs = DriveReferenceArgs & {
+  parent_item_id?: string,
+  parent_path?: string,
+  force_refresh?: boolean
+}
+
 function getString(value: unknown) {
   return typeof value === "string" && value.trim() ? value : null
+}
+
+function requireString(value: unknown, label: string) {
+  const text = getString(value)
+  if (!text) {
+    throw new Error(`Provide ${label}.`)
+  }
+
+  return text
 }
 
 function getNumber(value: unknown) {
@@ -160,11 +178,27 @@ function encodeDrivePath(value: string) {
     .join("/")
 }
 
+function encodeGraphSearchText(value: string) {
+  return encodeURIComponent(value.replace(/'/g, "''"))
+}
+
+function validateDriveItemName(value: string, label: string) {
+  if (/[\\/]/.test(value)) {
+    throw new Error(`${label} must be a single item name, not a path.`)
+  }
+
+  return value
+}
+
 function normalizeItemPath(value: string | undefined) {
   return String(value || "")
     .replace(/\\/g, "/")
     .replace(/^\/+/, "")
     .replace(/\/+$/, "")
+}
+
+function readMaxBytes(value: unknown, fallback: number) {
+  return clampPositiveInt(value, fallback, MAX_DOWNLOAD_BYTES)
 }
 
 function tryParseUrl(value: string | null) {
@@ -587,6 +621,14 @@ export async function resolveDriveItemReference(args: DriveItemReferenceArgs) {
   }
 }
 
+async function resolveDriveContainerReference(args: DriveContainerReferenceArgs) {
+  return resolveDriveItemReference({
+    ...args,
+    item_id: args.parent_item_id,
+    item_path: args.parent_path
+  })
+}
+
 export async function listDriveItems(args: DriveItemReferenceArgs & { limit?: number, query?: string }) {
   const { drive, item: container } = await resolveDriveItemReference(args)
   if (!drive.id) {
@@ -692,5 +734,227 @@ export async function createShareLink(args: DriveItemReferenceArgs & {
     drive,
     item,
     link: summarizeSharePermission(result)
+  }
+}
+
+export async function searchDriveItems(args: Omit<DriveReferenceArgs, "query"> & {
+  query: string,
+  limit?: number
+}) {
+  const query = requireString(args.query, "query")
+  const drive = await resolveDriveReference(args)
+  if (!drive.id) {
+    throw new Error("The resolved drive does not expose a valid id.")
+  }
+
+  const result = await graphResult({
+    path: `/drives/${encodePathSegment(drive.id)}/root/search(q='${encodeGraphSearchText(query)}')`,
+    method: "GET",
+    query: {
+      "$top": clampPositiveInt(args.limit, DEFAULT_ITEM_LIST_LIMIT)
+    },
+    force_refresh: Boolean(args.force_refresh)
+  })
+
+  const items = getCollectionItems(result).map((value) => summarizeDriveItem(value, drive))
+  return {
+    drive,
+    query,
+    count: items.length,
+    items
+  }
+}
+
+export async function createDriveFolder(args: DriveContainerReferenceArgs & {
+  folder_name: string,
+  conflict_behavior?: string
+}) {
+  const folderName = validateDriveItemName(requireString(args.folder_name, "folder_name"), "folder_name")
+  const { drive, item: parent } = await resolveDriveContainerReference(args)
+  if (!drive.id || !parent.id) {
+    throw new Error("The resolved parent folder does not expose the ids needed to create a folder.")
+  }
+
+  if (!parent.isFolder) {
+    throw new Error("The resolved parent item is not a folder.")
+  }
+
+  const result = await graphResult({
+    path: `/drives/${encodePathSegment(drive.id)}/items/${encodePathSegment(parent.id)}/children`,
+    method: "POST",
+    body: {
+      name: folderName,
+      folder: {},
+      "@microsoft.graph.conflictBehavior": getString(args.conflict_behavior) || "rename"
+    },
+    force_refresh: Boolean(args.force_refresh)
+  })
+
+  return {
+    drive,
+    parent,
+    folder: summarizeDriveItem(result, drive)
+  }
+}
+
+export async function downloadDriveItem(args: DriveItemReferenceArgs & { max_bytes?: number }) {
+  const { drive, item } = await resolveDriveItemReference(args)
+  if (!drive.id || !item.id) {
+    throw new Error("The resolved file item does not expose the ids needed to download content.")
+  }
+
+  if (!item.isFile) {
+    throw new Error("The requested item is not a file. Download folders as an archive outside this small-file helper.")
+  }
+
+  const maxBytes = readMaxBytes(args.max_bytes, DEFAULT_DOWNLOAD_MAX_BYTES)
+  const result = await downloadGraphBytes({
+    path: `/drives/${encodePathSegment(drive.id)}/items/${encodePathSegment(item.id)}/content`,
+    force_refresh: Boolean(args.force_refresh)
+  })
+
+  if (result.contentLength !== null && result.contentLength > maxBytes) {
+    throw new Error(`File is too large to return safely (${result.contentLength} bytes > ${maxBytes} bytes).`)
+  }
+
+  if (result.bytes.byteLength > maxBytes) {
+    throw new Error(`File is too large to return safely (${result.bytes.byteLength} bytes > ${maxBytes} bytes).`)
+  }
+
+  return {
+    drive,
+    item,
+    content_type: result.contentType || item.mimeType,
+    byte_length: result.bytes.byteLength,
+    content_base64: Buffer.from(result.bytes).toString("base64")
+  }
+}
+
+export async function uploadSmallDriveItem(args: DriveContainerReferenceArgs & {
+  file_name: string,
+  content_base64: string,
+  content_type?: string,
+  conflict_behavior?: string
+}) {
+  const fileName = validateDriveItemName(requireString(args.file_name, "file_name"), "file_name")
+  const contentBase64 = requireString(args.content_base64, "content_base64")
+  const bytes = Buffer.from(contentBase64, "base64")
+
+  if (bytes.byteLength === 0) {
+    throw new Error("content_base64 decoded to an empty file.")
+  }
+
+  if (bytes.byteLength > MAX_SIMPLE_UPLOAD_BYTES) {
+    throw new Error(
+      `File is too large for simple upload (${bytes.byteLength} bytes > ${MAX_SIMPLE_UPLOAD_BYTES} bytes). Use an upload session workflow instead.`
+    )
+  }
+
+  const { drive, item: parent } = await resolveDriveContainerReference(args)
+  if (!drive.id || !parent.id) {
+    throw new Error("The resolved parent folder does not expose the ids needed to upload content.")
+  }
+
+  if (!parent.isFolder) {
+    throw new Error("The resolved parent item is not a folder.")
+  }
+
+  const result = await executeGraphRawRequest({
+    path: `/drives/${encodePathSegment(drive.id)}/items/${encodePathSegment(parent.id)}:/${encodePathSegment(fileName)}:/content`,
+    method: "PUT",
+    query: {
+      "@microsoft.graph.conflictBehavior": getString(args.conflict_behavior) || "rename"
+    },
+    body: bytes,
+    content_type: getString(args.content_type) || "application/octet-stream",
+    force_refresh: Boolean(args.force_refresh)
+  })
+
+  return {
+    drive,
+    parent,
+    byte_length: bytes.byteLength,
+    item: summarizeDriveItem(result.result, drive)
+  }
+}
+
+export async function updateDriveItem(args: DriveItemReferenceArgs & {
+  new_name?: string,
+  target_parent_item_id?: string,
+  target_parent_path?: string
+}) {
+  const newName = getString(args.new_name)
+  const targetParentItemId = getString(args.target_parent_item_id)
+  const targetParentPath = getString(args.target_parent_path)
+
+  if (!newName && !targetParentItemId && !targetParentPath) {
+    throw new Error("Provide new_name, target_parent_item_id or target_parent_path.")
+  }
+
+  const { drive, item } = await resolveDriveItemReference(args)
+  if (!drive.id || !item.id) {
+    throw new Error("The resolved item does not expose the ids needed to update it.")
+  }
+
+  const body: JsonRecord = {}
+  if (newName) {
+    body.name = validateDriveItemName(newName, "new_name")
+  }
+
+  let targetParent: DriveItemSummary | null = null
+  if (targetParentItemId || targetParentPath) {
+    const resolvedParent = await resolveDriveContainerReference({
+      ...args,
+      parent_item_id: targetParentItemId || undefined,
+      parent_path: targetParentPath || undefined
+    })
+
+    if (resolvedParent.drive.id !== drive.id) {
+      throw new Error("Moving items across drives is not supported by this helper.")
+    }
+
+    if (!resolvedParent.item.id || !resolvedParent.item.isFolder) {
+      throw new Error("The target parent must resolve to a folder with an id.")
+    }
+
+    targetParent = resolvedParent.item
+    body.parentReference = { id: resolvedParent.item.id }
+  }
+
+  const result = await graphResult({
+    path: `/drives/${encodePathSegment(drive.id)}/items/${encodePathSegment(item.id)}`,
+    method: "PATCH",
+    body,
+    force_refresh: Boolean(args.force_refresh)
+  })
+
+  return {
+    drive,
+    previous_item: item,
+    target_parent: targetParent,
+    item: summarizeDriveItem(result, drive)
+  }
+}
+
+export async function deleteDriveItem(args: DriveItemReferenceArgs & { confirm?: boolean }) {
+  if (args.confirm !== true) {
+    throw new Error("Set confirm=true to delete a drive item.")
+  }
+
+  const { drive, item } = await resolveDriveItemReference(args)
+  if (!drive.id || !item.id) {
+    throw new Error("The resolved item does not expose the ids needed to delete it.")
+  }
+
+  await graphResult({
+    path: `/drives/${encodePathSegment(drive.id)}/items/${encodePathSegment(item.id)}`,
+    method: "DELETE",
+    force_refresh: Boolean(args.force_refresh)
+  })
+
+  return {
+    ok: true,
+    drive,
+    deleted_item: item
   }
 }

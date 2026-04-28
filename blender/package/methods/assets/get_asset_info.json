@@ -1,0 +1,18 @@
+{
+  "name": "get_asset_info",
+  "domain": "assets",
+  "description": "Get asset info.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_assets",
+    "function": "get_asset_info"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

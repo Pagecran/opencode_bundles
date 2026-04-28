@@ -1,0 +1,16 @@
+{
+  "name": "scatter_library_asset_on_surface",
+  "domain": "workflows",
+  "description": "Scatter library asset on surface.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_script",
+    "script": "blender/workflows/scatter_library_asset_on_surface.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

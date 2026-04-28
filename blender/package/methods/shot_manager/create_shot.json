@@ -1,0 +1,18 @@
+{
+  "name": "create_shot",
+  "domain": "shot_manager",
+  "description": "Create shot.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_shot_manager",
+    "function": "create_shot"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

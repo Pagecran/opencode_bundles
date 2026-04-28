@@ -1,0 +1,16 @@
+{
+  "name": "list_level_sequences",
+  "domain": "sequencer",
+  "description": "List Level Sequence assets available to the project.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/sequencer/list_level_sequences.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

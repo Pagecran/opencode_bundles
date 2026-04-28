@@ -2,5 +2,6 @@
   "name": "teams",
   "displayName": "Teams",
   "version": "0.1.1",
-  "publishDirName": "teams"
+  "publishDirName": "teams",
+  "deprecated": true
 }

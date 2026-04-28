@@ -1,0 +1,16 @@
+{
+  "name": "get_editor_state",
+  "domain": "editor",
+  "description": "Read the current editor world and actor selection state.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "bridge_method",
+    "method": "get_editor_state"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "get_editor_state"
+    ]
+  }
+}

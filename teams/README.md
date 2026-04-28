@@ -1,5 +1,9 @@
 # Pagecran OpenCode Teams Bundle
 
+> Deprecated: use the Microsoft 365 bundle instead. This bundle is retained for
+> compatibility and can still be built explicitly with `-Bundle teams`, but it
+> is excluded from `-Bundle all`.
+
 Teams bundle for the Pagecran OpenCode bundles monorepo.
 
 ## What is included

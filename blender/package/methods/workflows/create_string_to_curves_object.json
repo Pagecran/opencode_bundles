@@ -1,0 +1,16 @@
+{
+  "name": "create_string_to_curves_object",
+  "domain": "workflows",
+  "description": "Create string to curves object.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_script",
+    "script": "blender/workflows/create_string_to_curves_object.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

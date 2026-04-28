@@ -1,0 +1,16 @@
+{
+  "name": "list_data_layers",
+  "domain": "data_layers",
+  "description": "List Data Layers in the active world.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/data_layers/list_data_layers.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

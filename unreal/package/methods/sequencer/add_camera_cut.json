@@ -1,0 +1,16 @@
+{
+  "name": "add_camera_cut",
+  "domain": "sequencer",
+  "description": "Create or update a camera cut section.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/sequencer/add_camera_cut.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

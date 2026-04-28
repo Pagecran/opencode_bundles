@@ -1,0 +1,18 @@
+{
+  "name": "search_sketchfab_models",
+  "domain": "addons",
+  "description": "Search sketchfab models.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_addons",
+    "function": "search_sketchfab_models"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

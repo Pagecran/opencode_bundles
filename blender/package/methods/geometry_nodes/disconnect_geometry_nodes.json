@@ -1,0 +1,18 @@
+{
+  "name": "disconnect_geometry_nodes",
+  "domain": "geometry_nodes",
+  "description": "Disconnect geometry nodes.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_geometry_nodes",
+    "function": "disconnect_geometry_nodes"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

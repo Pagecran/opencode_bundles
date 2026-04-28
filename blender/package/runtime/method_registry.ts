@@ -1,14 +1,20 @@
-import { blenderMethodDefinitions } from "../methods/registry"
-import type { BlenderMethodDefinition } from "./types"
+import { dirname, join } from "node:path"
+import { fileURLToPath } from "node:url"
 
-const methodMap = new Map<string, BlenderMethodDefinition>(
-  blenderMethodDefinitions.map((definition) => [definition.name, definition])
-)
+import { loadMethodRegistry } from "../_runtime/method_registry"
+import type { MethodManifest } from "../_runtime/types"
 
-export function getBlenderMethodDefinition(method: string) {
-  return methodMap.get(method)
+const runtimeDir = dirname(fileURLToPath(import.meta.url))
+const registry = loadMethodRegistry(join(runtimeDir, "..", "methods"))
+
+export function getBlenderMethodDefinition(method: string): MethodManifest | null {
+  return registry.get(method)
 }
 
-export function listBlenderMethodDefinitions() {
-  return blenderMethodDefinitions
+export function listBlenderMethodDefinitions(): MethodManifest[] {
+  return registry.list()
+}
+
+export function getBlenderMethodRegistry() {
+  return registry
 }

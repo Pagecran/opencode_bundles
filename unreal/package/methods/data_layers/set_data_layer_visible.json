@@ -1,0 +1,16 @@
+{
+  "name": "set_data_layer_visible",
+  "domain": "data_layers",
+  "description": "Set whether a Data Layer is visible.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/data_layers/set_data_layer_visible.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

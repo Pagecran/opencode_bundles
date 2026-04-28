@@ -1,0 +1,18 @@
+{
+  "name": "list_asset_libraries",
+  "domain": "assets",
+  "description": "List asset libraries.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_assets",
+    "function": "list_asset_libraries"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

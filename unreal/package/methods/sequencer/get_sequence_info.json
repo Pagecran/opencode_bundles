@@ -1,0 +1,16 @@
+{
+  "name": "get_sequence_info",
+  "domain": "sequencer",
+  "description": "Read playback range, frame rate, bindings, and track data for a Level Sequence.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/sequencer/get_sequence_info.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

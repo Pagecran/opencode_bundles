@@ -1,0 +1,16 @@
+{
+  "name": "get_material_info",
+  "domain": "shading",
+  "description": "Read parent, parameters, usages, and shading metadata for a material or material instance.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/shading/get_material_info.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

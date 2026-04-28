@@ -1,0 +1,16 @@
+{
+  "name": "execute_python",
+  "domain": "core",
+  "description": "Execute Unreal Editor Python code through the PythonScriptPlugin.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "bridge_method",
+    "method": "execute_python"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

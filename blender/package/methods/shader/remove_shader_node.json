@@ -1,0 +1,18 @@
+{
+  "name": "remove_shader_node",
+  "domain": "shader",
+  "description": "Remove shader node.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_shader",
+    "function": "remove_shader_node"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

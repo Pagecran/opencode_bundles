@@ -1,0 +1,18 @@
+{
+  "name": "set_shot_manager_render_path",
+  "domain": "shot_manager",
+  "description": "Set shot manager render path.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_shot_manager",
+    "function": "set_shot_manager_render_path"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

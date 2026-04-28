@@ -1,0 +1,18 @@
+{
+  "name": "enable_disable_shots",
+  "domain": "shot_manager",
+  "description": "Enable disable shots.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_shot_manager",
+    "function": "enable_disable_shots"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

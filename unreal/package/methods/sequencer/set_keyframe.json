@@ -1,0 +1,16 @@
+{
+  "name": "set_keyframe",
+  "domain": "sequencer",
+  "description": "Set a keyframe on a Sequencer channel.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/sequencer/set_keyframe.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "create_material_and_assign",
+  "domain": "workflows",
+  "description": "Create material and assign.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_script",
+    "script": "blender/workflows/create_material_and_assign.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

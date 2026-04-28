@@ -1,0 +1,16 @@
+{
+  "name": "load_level",
+  "domain": "editor",
+  "description": "Open a level in the editor from an Unreal package or object path.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/editor/load_level.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

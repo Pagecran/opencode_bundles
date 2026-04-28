@@ -1,0 +1,23 @@
+{
+  "name": "@pagecran/bundle-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "runtime:sync-check": "powershell -ExecutionPolicy Bypass -File ../../scripts/sync_runtime.ps1 -CheckOnly"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./host": "./src/host_dispatcher.ts",
+    "./coherence": "./src/coherence_check.ts",
+    "./plugin": "./src/plugin_tools.ts"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": "1.3.3"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "1.3.3",
+    "@types/node": "22.13.9",
+    "typescript": "5.8.2"
+  }
+}

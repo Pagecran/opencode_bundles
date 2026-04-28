@@ -1,0 +1,18 @@
+{
+  "name": "list_geometry_nodes_modifiers",
+  "domain": "geometry_nodes",
+  "description": "List geometry nodes modifiers.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_geometry_nodes",
+    "function": "list_geometry_nodes_modifiers"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

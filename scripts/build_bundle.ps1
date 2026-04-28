@@ -60,7 +60,10 @@ function Resolve-Bundles {
     }
 
     if (($Requested.Count -eq 0) -or ($Requested -contains "all")) {
-        return $allBundles
+        return @($allBundles | Where-Object {
+            $manifest = Get-BundleManifest -BundleRoot $_.FullName
+            -not [bool]$manifest.deprecated
+        })
     }
 
     $selected = @()
@@ -73,6 +76,13 @@ function Resolve-Bundles {
     }
 
     return $selected
+}
+
+function Sync-SharedRuntime {
+    $scriptPath = Join-Path $PSScriptRoot "sync_runtime.ps1"
+    if (Test-Path -LiteralPath $scriptPath) {
+        & powershell -ExecutionPolicy Bypass -File $scriptPath
+    }
 }
 
 function Invoke-RobocopyMirror {
@@ -112,6 +122,8 @@ Ensure-Directory -Path $OutputRoot
 if (-not $SkipPublish) {
     Ensure-Directory -Path $PublishRoot
 }
+
+Sync-SharedRuntime
 
 $bundleRoots = @(Resolve-Bundles -Requested $Bundle)
 

@@ -1,0 +1,18 @@
+{
+  "name": "assign_material",
+  "domain": "shader",
+  "description": "Assign material.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_shader",
+    "function": "assign_material"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

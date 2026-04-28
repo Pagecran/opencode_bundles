@@ -1,0 +1,16 @@
+{
+  "name": "get_data_layer_info",
+  "domain": "data_layers",
+  "description": "Read state, visibility, and membership information for a Data Layer.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/data_layers/get_data_layer_info.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

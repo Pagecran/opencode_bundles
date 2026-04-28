@@ -1,0 +1,16 @@
+{
+  "name": "apply_library_material_to_object",
+  "domain": "workflows",
+  "description": "Apply library material to object.",
+  "kind": "host-backed",
+  "risk": "write",
+  "execution": {
+    "strategy": "host_script",
+    "script": "blender/workflows/apply_library_material_to_object.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}

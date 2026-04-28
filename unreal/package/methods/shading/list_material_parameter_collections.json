@@ -1,0 +1,16 @@
+{
+  "name": "list_material_parameter_collections",
+  "domain": "shading",
+  "description": "List available Material Parameter Collections.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/shading/list_material_parameter_collections.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

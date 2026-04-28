@@ -1,0 +1,16 @@
+{
+  "name": "list_movie_render_graphs",
+  "domain": "movie_render_graph",
+  "description": "List Movie Render Graph assets available to the project.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/movie_render_graph/list_movie_render_graphs.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  }
+}

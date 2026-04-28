@@ -1,0 +1,18 @@
+{
+  "name": "search_blenderkit_assets",
+  "domain": "addons",
+  "description": "Search blenderkit assets.",
+  "kind": "host-backed",
+  "risk": "read",
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_addons",
+    "function": "search_blenderkit_assets"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  }
+}
