@@ -4,6 +4,17 @@
   "description": "Open a Level Sequence asset in the Sequencer editor.",
   "kind": "host-backed",
   "risk": "write",
+  "args": {
+    "sequence_path": {
+      "type": "string",
+      "required": true,
+      "description": "Level Sequence asset path."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Sequence summary for the asset that was opened in Sequencer."
+  },
   "execution": {
     "strategy": "host_script",
     "script": "unreal/editor/open_level_sequence.py"
@@ -12,5 +23,9 @@
     "bridgeMethods": [
       "execute_python"
     ]
+  },
+  "verify": {
+    "strategy": "followup_method",
+    "method": "get_sequence_info"
   }
 }

@@ -82,8 +82,11 @@ It talks directly to Microsoft Graph with delegated OAuth device-code authentica
 
 Environment variables:
 
-- `PAGECRAN_M365_CLIENT_ID` - required, Microsoft Entra app client id
-- `PAGECRAN_M365_TENANT_ID` - optional, defaults to `common`
+- shared default app: `TeamsPascale`
+- default client id: `674f3d17-5a27-417b-bcff-bfea2e61447b`
+- default tenant id: `2fa485e4-1eee-4081-8445-98037b332c71`
+- `PAGECRAN_M365_CLIENT_ID` - optional override, Microsoft Entra app client id
+- `PAGECRAN_M365_TENANT_ID` - optional override, Microsoft Entra tenant id
 - `PAGECRAN_M365_SCOPES` - optional, space or comma separated scopes
 - `PAGECRAN_M365_AUTH_FILE` - optional auth storage path override
 - `PAGECRAN_M365_PENDING_AUTH_FILE` - optional pending-login storage path override
@@ -94,16 +97,26 @@ Compatibility fallbacks:
 - if `PAGECRAN_M365_TENANT_ID` is not set, the bundle also accepts `PAGECRAN_TEAMS_TENANT_ID`
 - if `PAGECRAN_M365_SCOPES` is not set, the bundle also accepts `PAGECRAN_TEAMS_SCOPES`
 
-Default scopes:
+Default shared scopes:
 
 - `offline_access`
 - `openid`
 - `profile`
 - `User.Read`
-- `Files.Read.All`
-- `Sites.Read.All`
+- `Files.ReadWrite.All`
+- `Sites.ReadWrite.All`
+- `Chat.Read`
+- `Chat.ReadWrite`
+- `Team.ReadBasic.All`
+- `Channel.ReadBasic.All`
+- `ChannelMessage.Read.All`
+- `ChannelMessage.Send`
+- `Mail.Read`
+- `Mail.Send`
+- `MailboxSettings.ReadWrite`
 
-For write-heavy or domain-specific workflows, extend scopes explicitly, for example:
+These defaults are intentionally broad enough to cover the current M365 bundle surface with one shared login.
+You can still override them explicitly if needed, for example:
 
 - Excel write: `Files.ReadWrite.All`
 - SharePoint / OneDrive write: `Files.ReadWrite.All` or `Sites.ReadWrite.All`
@@ -111,8 +124,8 @@ For write-heavy or domain-specific workflows, extend scopes explicitly, for exam
 - Outlook mail: `Mail.Read`, `Mail.Send`
 - Outlook automatic replies / mailbox settings: `MailboxSettings.Read`, `MailboxSettings.ReadWrite`
 
-The default scope set stays conservative and does not include Teams scopes automatically.
-That keeps the default auth footprint file/site oriented while still allowing Teams tools when you opt in with extra scopes.
+Protected tools now try to reuse the local token automatically.
+If no valid token exists yet, the bundle auto-starts device-code login and returns the verification URL + user code instead of only failing with a generic auth error.
 
 ## Install
 
@@ -134,8 +147,8 @@ node .\package\bin\pagecran_m365_cli.mjs request GET /sites?search=Marketing
 
 ## Typical flow
 
-1. Authenticate with `m365_auth_device_start`
-2. Complete Microsoft login in the browser
+1. Use any protected M365 tool, or call `m365_auth_device_start`
+2. If needed, complete Microsoft login in the browser
 3. Confirm auth with `m365_auth_device_poll`
 4. Test connectivity with `m365_ping`
 5. Use the high-level files, sites and Excel tools when possible

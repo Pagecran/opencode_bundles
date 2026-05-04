@@ -147,11 +147,61 @@ function Merge-PackageJson {
     Write-Host "Merged package.json"
 }
 
+function Write-GlobalTsConfig {
+    $targetPath = Join-Path $ConfigRoot "tsconfig.json"
+    $jsonOut = @'
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "esModuleInterop": true,
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "plugins/**/*.ts",
+    "bundles/**/*.ts"
+  ]
+}
+'@
+
+    Set-Content -LiteralPath $targetPath -Value $jsonOut -Encoding UTF8
+    Write-Host "Installed file: tsconfig.json"
+}
+
+function Install-PluginShim {
+    param(
+        [string]$PluginName,
+        [string]$BundleName
+    )
+
+    $targetPath = Join-Path $ConfigRoot "plugins\$PluginName.ts"
+    $contents = @"
+export { default } from "../bundles/$BundleName/plugins/$PluginName"
+export * from "../bundles/$BundleName/plugins/$PluginName"
+"@
+
+    Ensure-Directory -Path (Split-Path -Parent $targetPath)
+    Set-Content -LiteralPath $targetPath -Value $contents -Encoding UTF8
+    Write-Host "Installed file: plugins\$PluginName.ts"
+}
+
 Ensure-Directory -Path $ConfigRoot
 
 Merge-PackageJson
 
-Install-File -RelativeSource "plugins\blender.ts" -RelativeTarget "plugins\blender.ts"
+Install-DirectoryTree -RelativeSource "plugins" -RelativeTarget "bundles\blender\plugins"
+Install-DirectoryTree -RelativeSource "runtime" -RelativeTarget "bundles\blender\runtime"
+Install-DirectoryTree -RelativeSource "_runtime" -RelativeTarget "bundles\blender\_runtime"
+Install-DirectoryTree -RelativeSource "methods" -RelativeTarget "bundles\blender\methods"
+Install-DirectoryTree -RelativeSource "scripts" -RelativeTarget "bundles\blender\scripts"
+Install-PluginShim -PluginName "blender" -BundleName "blender"
+Write-GlobalTsConfig
 
 # Clean up legacy files from previous versions
 $legacyFiles = @(
@@ -189,7 +239,6 @@ foreach ($legacy in $legacySkills) {
 }
 
 Install-File -RelativeSource "bin\pagecran_blender_cli.py" -RelativeTarget "bin\pagecran_blender_cli.py"
-Install-File -RelativeSource "tsconfig.json" -RelativeTarget "tsconfig.json"
 
 Install-DirectoryTree -RelativeSource "skills\pagecran-blender-scene" -RelativeTarget "skills\pagecran-blender-scene"
 Install-DirectoryTree -RelativeSource "skills\pagecran-blender-geometry-nodes" -RelativeTarget "skills\pagecran-blender-geometry-nodes"

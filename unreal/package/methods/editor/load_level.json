@@ -4,6 +4,17 @@
   "description": "Open a level in the editor from an Unreal package or object path.",
   "kind": "host-backed",
   "risk": "write",
+  "args": {
+    "level_path": {
+      "type": "string",
+      "required": true,
+      "description": "Unreal package path or object path for the map asset."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "World summary for the loaded map, including the normalized level path."
+  },
   "execution": {
     "strategy": "host_script",
     "script": "unreal/editor/load_level.py"
@@ -12,5 +23,9 @@
     "bridgeMethods": [
       "execute_python"
     ]
+  },
+  "verify": {
+    "strategy": "followup_method",
+    "method": "get_editor_state"
   }
 }

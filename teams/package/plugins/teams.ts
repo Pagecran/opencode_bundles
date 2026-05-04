@@ -1359,7 +1359,4 @@ export const TeamsPlugin = async () => {
   }
 }
 
-export default {
-  id: "teams",
-  server: TeamsPlugin
-}
+export default TeamsPlugin

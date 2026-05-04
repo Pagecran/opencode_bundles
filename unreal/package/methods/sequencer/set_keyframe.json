@@ -4,6 +4,32 @@
   "description": "Set a keyframe on a Sequencer channel.",
   "kind": "host-backed",
   "risk": "write",
+  "args": {
+    "sequence_path": {
+      "type": "string",
+      "required": true,
+      "description": "Level Sequence asset path."
+    },
+    "channel_path": {
+      "type": "string",
+      "required": true,
+      "description": "Binding transform target, for example <binding_guid>:transform or <binding_guid>:transform:location.x."
+    },
+    "frame": {
+      "type": "integer",
+      "required": true,
+      "description": "Display-rate frame number where the key should be written."
+    },
+    "value": {
+      "type": "any",
+      "required": true,
+      "description": "Either a numeric channel value or a whole-transform object with location, rotation, and scale payloads."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Keyframe mutation summary including the target binding, channel path, and frame."
+  },
   "execution": {
     "strategy": "host_script",
     "script": "unreal/sequencer/set_keyframe.py"
@@ -12,5 +38,9 @@
     "bridgeMethods": [
       "execute_python"
     ]
+  },
+  "verify": {
+    "strategy": "followup_method",
+    "method": "get_sequence_info"
   }
 }

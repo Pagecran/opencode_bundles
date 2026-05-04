@@ -4,6 +4,37 @@
   "description": "Set scalar, vector, or texture parameters on a material instance.",
   "kind": "host-backed",
   "risk": "write",
+  "args": {
+    "material_path": {
+      "type": "string",
+      "required": true,
+      "description": "Material instance asset path to update."
+    },
+    "parameter_name": {
+      "type": "string",
+      "required": true,
+      "description": "Material parameter name."
+    },
+    "parameter_type": {
+      "type": "string",
+      "required": true,
+      "description": "Material parameter type.",
+      "enum": [
+        "scalar",
+        "vector",
+        "texture"
+      ]
+    },
+    "value": {
+      "type": "any",
+      "required": true,
+      "description": "Scalar number, vector object, or texture asset path depending on parameter_type."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Material parameter mutation summary including the normalized parameter type."
+  },
   "execution": {
     "strategy": "host_script",
     "script": "unreal/shading/set_material_parameter.py"
@@ -12,5 +43,9 @@
     "bridgeMethods": [
       "execute_python"
     ]
+  },
+  "verify": {
+    "strategy": "followup_method",
+    "method": "get_material_info"
   }
 }

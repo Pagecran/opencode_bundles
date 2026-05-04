@@ -4,6 +4,17 @@
   "description": "Read playback range, frame rate, bindings, and track data for a Level Sequence.",
   "kind": "host-backed",
   "risk": "read",
+  "args": {
+    "sequence_path": {
+      "type": "string",
+      "required": true,
+      "description": "Level Sequence asset path."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Sequence inspection payload covering playback range, frame rates, bindings, shots, and tracks."
+  },
   "execution": {
     "strategy": "host_script",
     "script": "unreal/sequencer/get_sequence_info.py"

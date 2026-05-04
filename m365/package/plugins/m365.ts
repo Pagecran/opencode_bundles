@@ -10,7 +10,4 @@ export const M365Plugin = async () => ({
   })
 })
 
-export default {
-  id: "m365",
-  server: M365Plugin
-}
+export default M365Plugin

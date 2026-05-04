@@ -4,6 +4,32 @@
   "description": "Add a Sequencer track to a sequence or binding.",
   "kind": "host-backed",
   "risk": "write",
+  "args": {
+    "sequence_path": {
+      "type": "string",
+      "required": true,
+      "description": "Level Sequence asset path."
+    },
+    "track_type": {
+      "type": "string",
+      "required": true,
+      "description": "Track scaffold to create.",
+      "enum": [
+        "camera_cut",
+        "transform",
+        "skeletal_animation",
+        "animation"
+      ]
+    },
+    "binding_id": {
+      "type": "string",
+      "description": "Binding GUID for binding-scoped tracks. Required for transform and animation tracks."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Track mutation summary including the normalized track type and affected binding when applicable."
+  },
   "execution": {
     "strategy": "host_script",
     "script": "unreal/sequencer/add_track.py"
@@ -12,5 +38,9 @@
     "bridgeMethods": [
       "execute_python"
     ]
+  },
+  "verify": {
+    "strategy": "followup_method",
+    "method": "get_sequence_info"
   }
 }

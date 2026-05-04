@@ -9,6 +9,7 @@ import type {
   MethodRequires
 } from "./types"
 import type { MethodRegistry } from "./method_registry"
+import { validateAndNormalizeArgs } from "./manifest_args"
 import { ensureJsonObject } from "./validators"
 
 // ---------------------------------------------------------------------------
@@ -147,7 +148,8 @@ async function executeDefinition(
   options: DispatchOptions,
   profile: BridgeProfile
 ) {
-  const params = ensureJsonObject(options.params)
+  const rawParams = ensureJsonObject(options.params)
+  const params = definition.args ? validateAndNormalizeArgs(definition, rawParams) : rawParams
   const execution = definition.execution
 
   if (execution.strategy === "bridge_method") {
@@ -205,8 +207,11 @@ async function buildCapabilities(
     description: definition.description,
     kind: definition.kind,
     risk: definition.risk,
+    args: definition.args,
+    returns: definition.returns,
     execution: definition.execution.strategy,
-    requires: (definition.requires ?? {}) as MethodRequires
+    requires: (definition.requires ?? {}) as MethodRequires,
+    verify: definition.verify
   }))
 
   try {

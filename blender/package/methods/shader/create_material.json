@@ -1,9 +1,25 @@
 {
   "name": "create_material",
   "domain": "shader",
-  "description": "Create material.",
+  "description": "Create a new material, optionally with nodes enabled.",
   "kind": "host-backed",
   "risk": "write",
+  "args": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "description": "Exact material name to create."
+    },
+    "use_nodes": {
+      "type": "boolean",
+      "description": "Whether the material should use a shader node tree.",
+      "default": true
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Material summary for the newly created material."
+  },
   "execution": {
     "strategy": "host_function",
     "package": "opencode_blender_bundle",
@@ -14,5 +30,9 @@
     "bridgeMethods": [
       "execute_code"
     ]
+  },
+  "verify": {
+    "strategy": "followup_method",
+    "method": "get_material_info"
   }
 }

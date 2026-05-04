@@ -3,7 +3,35 @@
   "domain": "movie_render_graph",
   "description": "Render a sequence through Movie Render Graph.",
   "kind": "host-backed",
-  "risk": "write",
+  "risk": "destructive",
+  "args": {
+    "graph_path": {
+      "type": "string",
+      "required": true,
+      "description": "Movie Render Graph asset path."
+    },
+    "sequence_path": {
+      "type": "string",
+      "required": true,
+      "description": "Level Sequence asset path."
+    },
+    "map_path": {
+      "type": "string",
+      "description": "Optional map asset path to force on the queued job."
+    },
+    "job_name": {
+      "type": "string",
+      "description": "Optional queue job label. Defaults to the sequence name."
+    },
+    "output_path": {
+      "type": "string",
+      "description": "Requested output path. The current scaffold keeps graph-authored output settings authoritative."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Render request summary including the configured job and current rendering state."
+  },
   "execution": {
     "strategy": "host_script",
     "script": "unreal/movie_render_graph/render_sequence_with_graph.py"

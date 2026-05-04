@@ -51,7 +51,7 @@ The plugin exposes **6 generic tools**. Domain knowledge (method names, paramete
 |-------|----------|
 | `pagecran-blender-scene` | "Blender scene", "create an object", "move the camera" |
 | `pagecran-blender-geometry-nodes` | "Geometry Nodes", "node tree", "scatter on surface" |
-| `pagecran-blender-shader-editor` | "shader editor", "material nodes", "assign a material" |
+| `pagecran-blender-shader-editor` | "shader editor", "material nodes", "assign a material", "vrscene", "vray material" |
 | `pagecran-blender-asset-browser` | "asset browser", "asset library", "mark as asset" |
 | `pagecran-blender-blenderkit` | "BlenderKit", "find a BlenderKit asset" |
 | `pagecran-blender-sketchfab` | "Sketchfab", "import from Sketchfab" |
@@ -97,3 +97,14 @@ python "$env:USERPROFILE\.config\opencode\bin\pagecran_blender_cli.py" send exec
 ```
 
 Bundle-defined scene, shader, asset, and workflow methods are exposed through `blender_request` inside OpenCode, not as direct bridge commands.
+
+## VRScene Material Conversion
+
+The Blender bundle now starts exposing the old V-Ray `.vrscene` conversion layer through `blender_request`:
+
+- `analyze_vrscene_file`
+- `convert_vrscene_file`
+- `convert_vrscene_folder`
+
+These methods come from the former Pagecran MCP material-conversion tooling and support triplanar parsing plus `UVWGenRandomizer` inspection.
+For faithful random-UVW reconstruction, provide a compatible custom shader mapping group through `mapping_group_name` and optionally `group_socket_map`.

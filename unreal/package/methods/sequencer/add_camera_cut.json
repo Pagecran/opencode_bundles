@@ -4,6 +4,32 @@
   "description": "Create or update a camera cut section.",
   "kind": "host-backed",
   "risk": "write",
+  "args": {
+    "sequence_path": {
+      "type": "string",
+      "required": true,
+      "description": "Level Sequence asset path."
+    },
+    "camera_binding_id": {
+      "type": "string",
+      "required": true,
+      "description": "Camera binding GUID used by the cut section."
+    },
+    "start_frame": {
+      "type": "integer",
+      "required": true,
+      "description": "Section start frame in display-rate units."
+    },
+    "end_frame": {
+      "type": "integer",
+      "required": true,
+      "description": "Section end frame in display-rate units."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Camera cut section summary including binding id and frame range."
+  },
   "execution": {
     "strategy": "host_script",
     "script": "unreal/sequencer/add_camera_cut.py"
@@ -12,5 +38,9 @@
     "bridgeMethods": [
       "execute_python"
     ]
+  },
+  "verify": {
+    "strategy": "followup_method",
+    "method": "get_sequence_info"
   }
 }

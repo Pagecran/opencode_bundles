@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "check:types": "bunx tsc --noEmit -p tsconfig.json",
+    "check": "bun run check:types && bun run runtime:sync-check",
     "runtime:sync-check": "powershell -ExecutionPolicy Bypass -File ../../scripts/sync_runtime.ps1 -CheckOnly"
   },
   "exports": {

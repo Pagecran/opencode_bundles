@@ -147,9 +147,61 @@ function Merge-PackageJson {
     Write-Host "Merged package.json"
 }
 
+function Write-GlobalTsConfig {
+    $targetPath = Join-Path $ConfigRoot "tsconfig.json"
+    $jsonOut = @'
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "esModuleInterop": true,
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "plugins/**/*.ts",
+    "bundles/**/*.ts"
+  ]
+}
+'@
+
+    Set-Content -LiteralPath $targetPath -Value $jsonOut -Encoding UTF8
+    Write-Host "Installed file: tsconfig.json"
+}
+
+function Install-PluginShim {
+    param(
+        [string]$PluginName,
+        [string]$BundleName
+    )
+
+    $targetPath = Join-Path $ConfigRoot "plugins\$PluginName.ts"
+    $contents = @"
+export { default } from "../bundles/$BundleName/plugins/$PluginName"
+export * from "../bundles/$BundleName/plugins/$PluginName"
+"@
+
+    Ensure-Directory -Path (Split-Path -Parent $targetPath)
+    Set-Content -LiteralPath $targetPath -Value $contents -Encoding UTF8
+    Write-Host "Installed file: plugins\$PluginName.ts"
+}
+
 Ensure-Directory -Path $ConfigRoot
 
 Merge-PackageJson
+
+Install-DirectoryTree -RelativeSource "plugins" -RelativeTarget "bundles\unreal\plugins"
+Install-DirectoryTree -RelativeSource "runtime" -RelativeTarget "bundles\unreal\runtime"
+Install-DirectoryTree -RelativeSource "_runtime" -RelativeTarget "bundles\unreal\_runtime"
+Install-DirectoryTree -RelativeSource "methods" -RelativeTarget "bundles\unreal\methods"
+Install-DirectoryTree -RelativeSource "scripts" -RelativeTarget "bundles\unreal\scripts"
+Install-PluginShim -PluginName "unreal" -BundleName "unreal"
+Write-GlobalTsConfig
 
 $legacySkills = @(
     "skills\pagecran-unreal-build"
@@ -162,15 +214,11 @@ foreach ($legacy in $legacySkills) {
     }
 }
 
-Install-File -RelativeSource "plugins\unreal.ts" -RelativeTarget "plugins\unreal.ts"
 Install-File -RelativeSource "bin\pagecran_unreal_cli.mjs" -RelativeTarget "bin\pagecran_unreal_cli.mjs"
-Install-File -RelativeSource "tsconfig.json" -RelativeTarget "tsconfig.json"
 
 Install-DirectoryTree -RelativeSource "skills\pagecran-unreal-editor" -RelativeTarget "skills\pagecran-unreal-editor"
 Install-DirectoryTree -RelativeSource "skills\pagecran-unreal-sequencer" -RelativeTarget "skills\pagecran-unreal-sequencer"
-Install-DirectoryTree -RelativeSource "skills\pagecran-unreal-usd-stage" -RelativeTarget "skills\pagecran-unreal-usd-stage"
 Install-DirectoryTree -RelativeSource "skills\pagecran-unreal-data-layers" -RelativeTarget "skills\pagecran-unreal-data-layers"
-Install-DirectoryTree -RelativeSource "skills\pagecran-unreal-rendering" -RelativeTarget "skills\pagecran-unreal-rendering"
 Install-DirectoryTree -RelativeSource "skills\pagecran-unreal-movie-render-graph" -RelativeTarget "skills\pagecran-unreal-movie-render-graph"
 Install-DirectoryTree -RelativeSource "skills\pagecran-unreal-shading" -RelativeTarget "skills\pagecran-unreal-shading"
 

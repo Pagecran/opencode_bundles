@@ -672,7 +672,4 @@ export const BlenderPlugin: Plugin = async () => {
   }
 }
 
-export default {
-  id: "blender",
-  server: BlenderPlugin
-}
+export default BlenderPlugin

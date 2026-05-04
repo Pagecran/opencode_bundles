@@ -1,9 +1,43 @@
 {
   "name": "create_object",
   "domain": "scene",
-  "description": "Create object.",
+  "description": "Create a primitive, camera, light, or empty in the active scene.",
   "kind": "host-backed",
   "risk": "write",
+  "args": {
+    "primitive": {
+      "type": "string",
+      "required": true,
+      "description": "Primitive type to create.",
+      "enum": [
+        "CUBE",
+        "SPHERE",
+        "CYLINDER",
+        "CONE",
+        "PLANE",
+        "CIRCLE",
+        "GRID",
+        "EMPTY",
+        "CAMERA",
+        "LIGHT"
+      ]
+    },
+    "name": {
+      "type": "string",
+      "description": "Optional explicit object name. Blender still applies collision suffixes when needed."
+    },
+    "location": {
+      "type": "array",
+      "description": "Optional world-space location as [x, y, z].",
+      "items": {
+        "type": "number"
+      }
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Created object summary containing the resolved Blender object name and type."
+  },
   "execution": {
     "strategy": "host_function",
     "package": "opencode_blender_bundle",
@@ -14,5 +48,9 @@
     "bridgeMethods": [
       "execute_code"
     ]
+  },
+  "verify": {
+    "strategy": "followup_method",
+    "method": "get_object_info"
   }
 }

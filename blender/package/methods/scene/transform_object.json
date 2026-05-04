@@ -1,9 +1,41 @@
 {
   "name": "transform_object",
   "domain": "scene",
-  "description": "Transform object.",
+  "description": "Update an object's location, Euler rotation, and or scale.",
   "kind": "host-backed",
   "risk": "write",
+  "args": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "description": "Exact Blender object name."
+    },
+    "location": {
+      "type": "array",
+      "description": "Optional world-space location as [x, y, z].",
+      "items": {
+        "type": "number"
+      }
+    },
+    "rotation": {
+      "type": "array",
+      "description": "Optional Euler rotation in radians as [x, y, z].",
+      "items": {
+        "type": "number"
+      }
+    },
+    "scale": {
+      "type": "array",
+      "description": "Optional scale factors as [x, y, z].",
+      "items": {
+        "type": "number"
+      }
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Updated object transform summary with the final location, rotation, and scale."
+  },
   "execution": {
     "strategy": "host_function",
     "package": "opencode_blender_bundle",
@@ -14,5 +46,9 @@
     "bridgeMethods": [
       "execute_code"
     ]
+  },
+  "verify": {
+    "strategy": "followup_method",
+    "method": "get_object_info"
   }
 }

@@ -8,6 +8,8 @@ description: |
   - "material nodes"
   - "shader graph"
   - "assign a material"
+  - "vrscene"
+  - "vray material"
 ---
 
 ## How to call methods
@@ -24,6 +26,7 @@ blender_request(method: "<method_name>", params: { ... })
 2. **Prefer templates** (`create_shader_material_from_template`, `create_material_and_assign`) for standard setups.
 3. For custom shader graphs, add nodes, then connect, then set inputs.
 4. **Verify** with `get_material_info` or `get_shader_editor_screenshot`.
+5. For V-Ray `.vrscene` conversion, inspect first with `analyze_vrscene_file`, then convert with `convert_vrscene_file` or `convert_vrscene_folder`.
 
 ---
 
@@ -191,6 +194,41 @@ Create from template + assign to object + optionally mark as asset, in one call.
 | `emission_color` | [r,g,b,a] | no |
 | `emission_strength` | number | no |
 | `alpha` | number | no |
+
+#### `analyze_vrscene_file`
+Inspect a `.vrscene` file before conversion.
+
+| Param | Type | Required |
+|-------|------|----------|
+| `filepath` | string | yes |
+
+Returns a summary of detected V-Ray material blocks, texture usage, triplanar usage, and `UVWGenRandomizer` usage.
+
+#### `convert_vrscene_file`
+Convert one `.vrscene` file into Blender materials.
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `filepath` | string | yes | Absolute path to the `.vrscene` file |
+| `mapping_group_name` | string | no | Custom shader node group for triplanar / random UVW equivalence |
+| `group_socket_map` | object | no | Semantic socket override map for the custom mapping group |
+| `replace_existing` | bool | no | Replace materials that already exist |
+| `use_fake_user` | bool | no | Keep converted materials alive with fake user |
+
+#### `convert_vrscene_folder`
+Batch-convert a whole folder of `.vrscene` files and optionally export a `.blend` material library.
+
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `folder_path` | string | yes | Folder containing `.vrscene` files |
+| `output_blend_path` | string | no | Optional output `.blend` library path |
+| `reset_scene` | bool | no | Reset to an empty file before batch conversion |
+| `mapping_group_name` | string | no | Custom shader node group for triplanar / random UVW equivalence |
+| `group_socket_map` | object | no | Semantic socket override map for the custom mapping group |
+| `replace_existing` | bool | no | Replace materials that already exist |
+| `use_fake_user` | bool | no | Keep converted materials alive with fake user |
+
+`UVWGenRandomizer` is only faithfully preserved when you provide a compatible custom mapping node group. Without it, the converter falls back to standard Blender mapping and reports warnings.
 
 #### `apply_library_material_to_object`
 Import a material from an asset library .blend file and assign it in one step.

@@ -203,6 +203,12 @@ powershell -ExecutionPolicy Bypass -File .\scripts\sync_runtime.ps1 -CheckOnly
 powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle all -SkipPublish
 ```
 
+Convenience wrapper for the active bundles:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\check_all.ps1
+```
+
 ## Review Checklist
 
 - The method has one manifest source of truth.

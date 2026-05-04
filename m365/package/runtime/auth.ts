@@ -4,14 +4,25 @@ import { dirname, join } from "node:path"
 
 import { uniqueNonEmpty } from "./validators"
 
-const DEFAULT_TENANT_ID = "common"
+export const DEFAULT_APP_NAME = "TeamsPascale"
+export const DEFAULT_CLIENT_ID = "674f3d17-5a27-417b-bcff-bfea2e61447b"
+export const DEFAULT_TENANT_ID = "2fa485e4-1eee-4081-8445-98037b332c71"
 const DEFAULT_SCOPES = [
   "offline_access",
   "openid",
   "profile",
   "User.Read",
-  "Files.Read.All",
-  "Sites.Read.All"
+  "Files.ReadWrite.All",
+  "Sites.ReadWrite.All",
+  "Chat.Read",
+  "Chat.ReadWrite",
+  "Team.ReadBasic.All",
+  "Channel.ReadBasic.All",
+  "ChannelMessage.Read.All",
+  "ChannelMessage.Send",
+  "Mail.Read",
+  "Mail.Send",
+  "MailboxSettings.ReadWrite"
 ]
 const AUTH_REFRESH_SKEW_MS = 120000
 
@@ -39,6 +50,12 @@ export type PendingAuth = {
   intervalSeconds: number,
   expiresAt: number,
   message: string | null
+}
+
+export type DeviceCodeBootstrap = {
+  autoStarted: boolean,
+  pending: PendingAuth,
+  scopeList: string[]
 }
 
 type DeviceStartParams = {
@@ -141,14 +158,11 @@ function removeFileIfExists(filePath: string) {
 }
 
 export function getClientId(explicitValue?: string) {
-  const value = explicitValue || getFirstEnvValue(["PAGECRAN_M365_CLIENT_ID", "PAGECRAN_TEAMS_CLIENT_ID"])
-  if (!value) {
-    throw new Error(
-      "Missing Microsoft client id. Set PAGECRAN_M365_CLIENT_ID or pass client_id explicitly."
-    )
-  }
-
-  return value
+  return (
+    explicitValue ||
+    getFirstEnvValue(["PAGECRAN_M365_CLIENT_ID", "PAGECRAN_TEAMS_CLIENT_ID"]) ||
+    DEFAULT_CLIENT_ID
+  )
 }
 
 export function getTenantId(explicitValue?: string) {
@@ -178,6 +192,26 @@ export function getScopeString(explicitScopes?: string[]) {
 
 export function getScopeList(scopeString?: string | null) {
   return uniqueNonEmpty(String(scopeString || "").split(/[\s,]+/))
+}
+
+export function buildScopeString(scopes: string[]) {
+  return uniqueNonEmpty(scopes).join(" ")
+}
+
+export function mergeScopes(...scopeLists: Array<string[] | null | undefined>) {
+  const merged: string[] = []
+  for (const scopeList of scopeLists) {
+    if (Array.isArray(scopeList)) {
+      merged.push(...scopeList)
+    }
+  }
+
+  return uniqueNonEmpty(merged)
+}
+
+export function hasAllScopes(availableScopes: string[], requiredScopes: string[]) {
+  const available = new Set(availableScopes.map((scope) => scope.toLowerCase()))
+  return requiredScopes.every((scope) => available.has(scope.toLowerCase()))
 }
 
 function buildOAuthUrl(tenantId: string, leaf: string) {
@@ -315,6 +349,38 @@ export async function startDeviceCode({ clientId, tenantId, scope }: DeviceStart
   return pending
 }
 
+export async function ensureDeviceCodeBootstrap(options?: {
+  clientId?: string,
+  tenantId?: string,
+  scopes?: string[]
+}) {
+  const clientId = getClientId(options?.clientId)
+  const tenantId = getTenantId(options?.tenantId)
+  const scopeList = mergeScopes(getScopeList(getScopeString()), options?.scopes)
+  const scope = buildScopeString(scopeList)
+  const pending = loadPendingAuth()
+
+  if (
+    pending &&
+    pending.expiresAt > Date.now() &&
+    pending.clientId === clientId &&
+    pending.tenantId === tenantId &&
+    hasAllScopes(getScopeList(pending.scope), scopeList)
+  ) {
+    return {
+      autoStarted: false,
+      pending,
+      scopeList
+    } satisfies DeviceCodeBootstrap
+  }
+
+  return {
+    autoStarted: true,
+    pending: await startDeviceCode({ clientId, tenantId, scope }),
+    scopeList
+  } satisfies DeviceCodeBootstrap
+}
+
 export async function pollForDeviceToken({
   clientId,
   tenantId,
@@ -435,9 +501,13 @@ export function getAuthStatus() {
   const pending = loadPendingAuth()
 
   return {
+    app_name: DEFAULT_APP_NAME,
     authenticated: Boolean(auth?.accessToken),
     auth_file: AUTH_FILE_PATH,
     pending_auth_file: PENDING_AUTH_FILE_PATH,
+    default_client_id: getClientId(),
+    default_tenant_id: getTenantId(),
+    default_scope: getScopeString(),
     tenant_id: auth?.tenantId || null,
     client_id: auth?.clientId || null,
     scope: auth?.scope || null,
@@ -446,7 +516,12 @@ export function getAuthStatus() {
     expires_in_ms: auth?.expiresAt ? auth.expiresAt - Date.now() : null,
     has_refresh_token: Boolean(auth?.refreshToken),
     pending_auth: Boolean(pending),
+    pending_client_id: pending?.clientId || null,
+    pending_tenant_id: pending?.tenantId || null,
+    pending_scope: pending?.scope || null,
     pending_user_code: pending?.userCode || null,
+    pending_verification_uri: pending?.verificationUri || null,
+    pending_verification_uri_complete: pending?.verificationUriComplete || null,
     pending_expires_at: pending?.expiresAt || null,
     default_scope_list: DEFAULT_SCOPES
   }

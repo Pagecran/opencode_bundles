@@ -3,7 +3,31 @@
   "domain": "movie_render_graph",
   "description": "Configure a graph-driven render job with sequence and map selection.",
   "kind": "host-backed",
-  "risk": "write",
+  "risk": "destructive",
+  "args": {
+    "graph_path": {
+      "type": "string",
+      "required": true,
+      "description": "Movie Render Graph asset path."
+    },
+    "sequence_path": {
+      "type": "string",
+      "required": true,
+      "description": "Level Sequence asset path."
+    },
+    "map_path": {
+      "type": "string",
+      "description": "Optional map asset path to force on the queued job."
+    },
+    "job_name": {
+      "type": "string",
+      "description": "Optional queue job label. Defaults to the sequence name."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Queued render job summary. This operation clears existing queue jobs before allocating a new one."
+  },
   "execution": {
     "strategy": "host_script",
     "script": "unreal/movie_render_graph/configure_movie_render_graph_job.py"

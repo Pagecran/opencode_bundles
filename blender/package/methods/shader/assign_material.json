@@ -1,9 +1,30 @@
 {
   "name": "assign_material",
   "domain": "shader",
-  "description": "Assign material.",
+  "description": "Assign an existing material to an object material slot.",
   "kind": "host-backed",
   "risk": "write",
+  "args": {
+    "object_name": {
+      "type": "string",
+      "required": true,
+      "description": "Target object name."
+    },
+    "material_name": {
+      "type": "string",
+      "required": true,
+      "description": "Material name to assign."
+    },
+    "slot_index": {
+      "type": "integer",
+      "description": "Material slot index to fill or overwrite.",
+      "default": 0
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Assignment summary containing the target object, material, and slot index."
+  },
   "execution": {
     "strategy": "host_function",
     "package": "opencode_blender_bundle",
@@ -14,5 +35,9 @@
     "bridgeMethods": [
       "execute_code"
     ]
+  },
+  "verify": {
+    "strategy": "followup_method",
+    "method": "get_object_info"
   }
 }

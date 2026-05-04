@@ -4,6 +4,27 @@
   "description": "Create a material instance from a parent material.",
   "kind": "host-backed",
   "risk": "write",
+  "args": {
+    "parent_material_path": {
+      "type": "string",
+      "required": true,
+      "description": "Parent material or material instance asset path."
+    },
+    "package_path": {
+      "type": "string",
+      "required": true,
+      "description": "Destination Unreal package path where the new asset should be created."
+    },
+    "asset_name": {
+      "type": "string",
+      "required": true,
+      "description": "New asset name without path separators or extension."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Created material instance asset path plus the resolved parent material path."
+  },
   "execution": {
     "strategy": "host_script",
     "script": "unreal/shading/create_material_instance.py"
@@ -12,5 +33,9 @@
     "bridgeMethods": [
       "execute_python"
     ]
+  },
+  "verify": {
+    "strategy": "followup_method",
+    "method": "get_material_info"
   }
 }

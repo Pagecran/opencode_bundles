@@ -9,6 +9,8 @@
 
 """OpenCode Blender Bridge - minimal socket bridge for Blender."""
 
+# pyright: reportMissingImports=false, reportInvalidTypeForm=false
+
 import bpy
 import io
 import json
@@ -24,7 +26,7 @@ BRIDGE_NAME = "OpenCode Blender Bridge"
 BRIDGE_LOG_PREFIX = "[OpenCodeBlenderBridge]"
 PROTOCOL_NAME = "opencode-blender-bridge"
 PROTOCOL_VERSION = "2.0"
-ADDON_VERSION = "0.3.0"
+ADDON_VERSION = "0.3.1"
 EVENT_POLL_INTERVAL_SECONDS = 0.35
 RESULT_MARKER = "__OPENCODE_BLENDER_RESULT__"
 
@@ -501,7 +503,7 @@ class OpenCodeBlenderBridgeServer:
 class OpenCodeBlenderBridgePreferences(bpy.types.AddonPreferences):
     bl_idname = _addon_module_name()
 
-    bridge_port = IntProperty(
+    bridge_port: IntProperty(
         name="Port",
         description="TCP port used by the OpenCode Blender Bridge socket server",
         default=9876,
@@ -543,7 +545,11 @@ def start_bridge(port=None):
 
 def start_bridge_from_preferences():
     preferences = get_bridge_preferences()
-    port = preferences.bridge_port if preferences else 9876
+    raw_port = getattr(preferences, "bridge_port", 9876) if preferences else 9876
+    try:
+        port = int(raw_port)
+    except Exception:
+        port = 9876
     return start_bridge(port=port)
 
 

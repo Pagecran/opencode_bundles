@@ -45,12 +45,15 @@ import {
 import {
   clearAuth,
   clearPendingAuth,
+  DEFAULT_APP_NAME,
+  ensureDeviceCodeBootstrap,
   getClientId,
+  getScopeList,
   getScopeString,
   getTenantId,
+  getValidAuth,
   loadPendingAuth,
-  pollForDeviceToken,
-  startDeviceCode
+  pollForDeviceToken
 } from "./auth"
 
 type HandlerArgs = Record<string, unknown>
@@ -84,15 +87,59 @@ const METHOD_HANDLERS: Record<string, MethodHandler> = {
   async m365_auth_device_start(args) {
     const clientId = getClientId(readOptionalString(args.client_id))
     const tenantId = getTenantId(readOptionalString(args.tenant_id))
-    const scope = getScopeString(readStringArray(args.scopes))
-    const pending = await startDeviceCode({ clientId, tenantId, scope })
+    const scopeList = getScopeList(getScopeString(readStringArray(args.scopes)))
+
+    try {
+      const auth = await getValidAuth()
+      const currentScopes = getScopeList(auth.scope)
+      if (auth.clientId === clientId && auth.tenantId === tenantId) {
+        const missingScopes = getMissingDeclaredScopes(
+          {
+            name: "m365_auth_device_start",
+            domain: "auth",
+            description: "",
+            kind: "hostless",
+            risk: "read",
+            execution: { strategy: "direct_api", tool: "m365_auth_device_start" },
+            requires: {
+              auth: false,
+              scopes: scopeList
+            }
+          },
+          currentScopes
+        )
+
+        if (missingScopes.length === 0) {
+          return {
+            ok: true,
+            authenticated: true,
+            already_authenticated: true,
+            app_name: DEFAULT_APP_NAME,
+            client_id: auth.clientId,
+            tenant_id: auth.tenantId,
+            scope: auth.scope,
+            scope_list: currentScopes,
+            auth_file: getAuthStatus().auth_file,
+            expires_at: auth.expiresAt
+          }
+        }
+      }
+    } catch {
+      // No valid stored auth yet: continue with device-code bootstrap below.
+    }
+
+    const bootstrap = await ensureDeviceCodeBootstrap({ clientId, tenantId, scopes: scopeList })
+    const pending = bootstrap.pending
 
     return {
       ok: true,
       authenticated: false,
+      auto_started: bootstrap.autoStarted,
+      app_name: DEFAULT_APP_NAME,
       client_id: clientId,
       tenant_id: tenantId,
-      scope,
+      scope: pending.scope,
+      scope_list: bootstrap.scopeList,
       device_code: pending.deviceCode,
       user_code: pending.userCode,
       verification_uri: pending.verificationUri,
@@ -106,6 +153,26 @@ const METHOD_HANDLERS: Record<string, MethodHandler> = {
   },
   async m365_auth_device_poll(args) {
     const pending = loadPendingAuth()
+    if (!pending) {
+      try {
+        const auth = await getValidAuth()
+        return {
+          authenticated: true,
+          pending: false,
+          app_name: DEFAULT_APP_NAME,
+          tokenFile: getAuthStatus().auth_file,
+          expiresAt: auth.expiresAt,
+          scope: auth.scope,
+          scopeList: getScopeList(auth.scope),
+          tenantId: auth.tenantId,
+          clientId: auth.clientId,
+          hasRefreshToken: Boolean(auth.refreshToken)
+        }
+      } catch {
+        // Fall through to the usual missing-device-code error below.
+      }
+    }
+
     const clientId = getClientId(readOptionalString(args.client_id) || pending?.clientId)
     const tenantId = getTenantId(readOptionalString(args.tenant_id) || pending?.tenantId)
     const explicitScopes = readStringArray(args.scopes)
@@ -275,14 +342,10 @@ function getSatisfyingScopes(requiredScope: string) {
   return REQUIRED_SCOPE_EQUIVALENTS[normalized] || [requiredScope]
 }
 
-function checkDeclaredScopes(manifest: MethodManifest) {
+function getMissingDeclaredScopes(manifest: MethodManifest, availableScopes: string[]) {
   const declaredScopes = manifest.requires?.scopes || []
-  if (declaredScopes.length === 0) {
-    return
-  }
-
-  const authStatus = getAuthStatus()
-  const availableScopes = new Set(authStatus.scope_list.map((scope) => scope.toLowerCase()))
+  const availableScopeSet = new Set(availableScopes.map((scope) => scope.toLowerCase()))
+  const missingScopes: string[] = []
 
   for (const scopeEntry of declaredScopes) {
     if (isHumanReadableScopeNote(scopeEntry)) {
@@ -292,31 +355,78 @@ function checkDeclaredScopes(manifest: MethodManifest) {
     const alternatives = splitScopeAlternatives(scopeEntry)
     const isSatisfied = alternatives.some((candidate) =>
       getSatisfyingScopes(candidate).some((acceptableScope) =>
-        availableScopes.has(acceptableScope.toLowerCase())
+        availableScopeSet.has(acceptableScope.toLowerCase())
       )
     )
 
     if (!isSatisfied) {
-      throw new Error(
-        `Missing required Microsoft Graph scope for ${manifest.name}: ${scopeEntry}. Re-authenticate with PAGECRAN_M365_SCOPES including the needed permission.`
-      )
+      missingScopes.push(scopeEntry)
     }
   }
+
+  return missingScopes
 }
 
-function verifyMethodRequirements(manifest: MethodManifest) {
-  if (!manifest.requires) {
+function collectBootstrapScopes(manifest: MethodManifest) {
+  const bootstrapScopes = getScopeList(getScopeString())
+
+  for (const scopeEntry of manifest.requires?.scopes || []) {
+    if (isHumanReadableScopeNote(scopeEntry)) {
+      continue
+    }
+
+    for (const alternative of splitScopeAlternatives(scopeEntry)) {
+      bootstrapScopes.push(...getSatisfyingScopes(alternative))
+    }
+  }
+
+  return getScopeList(bootstrapScopes.join(" "))
+}
+
+function buildAuthBootstrapError(
+  manifest: MethodManifest,
+  autoStarted: boolean,
+  pending: NonNullable<ReturnType<typeof loadPendingAuth>>,
+  missingScopes: string[] = []
+) {
+  const intro = autoStarted
+    ? `Microsoft 365 device-code login was started automatically for ${DEFAULT_APP_NAME} before running ${manifest.name}.`
+    : `Microsoft 365 device-code login is already pending for ${DEFAULT_APP_NAME} before running ${manifest.name}.`
+  const scopeNote =
+    missingScopes.length > 0
+      ? ` Missing required scopes: ${missingScopes.join(", ")}.`
+      : ""
+  const verificationUrl = pending.verificationUriComplete || pending.verificationUri
+
+  return [
+    intro + scopeNote,
+    `Open ${verificationUrl} and enter code ${pending.userCode}.`,
+    "Then retry the command or call m365_auth_device_poll."
+  ].join(" ")
+}
+
+async function verifyMethodRequirements(manifest: MethodManifest) {
+  if (!manifest.requires?.auth) {
     return
   }
 
-  if (manifest.requires.auth) {
-    const capabilities = resolveCapabilities()
-    if (!capabilities.authenticated) {
-      throw new Error(`Microsoft 365 authentication is required for ${manifest.name}. Start with m365_auth_device_start.`)
-    }
+  let auth
+  try {
+    auth = await getValidAuth()
+  } catch {
+    const bootstrap = await ensureDeviceCodeBootstrap({ scopes: collectBootstrapScopes(manifest) })
+    throw new Error(buildAuthBootstrapError(manifest, bootstrap.autoStarted, bootstrap.pending))
   }
 
-  checkDeclaredScopes(manifest)
+  const missingScopes = getMissingDeclaredScopes(manifest, getScopeList(auth.scope))
+  if (missingScopes.length > 0) {
+    const bootstrap = await ensureDeviceCodeBootstrap({
+      clientId: auth.clientId,
+      tenantId: auth.tenantId,
+      scopes: [...getScopeList(auth.scope), ...collectBootstrapScopes(manifest)]
+    })
+    throw new Error(buildAuthBootstrapError(manifest, bootstrap.autoStarted, bootstrap.pending, missingScopes))
+  }
 }
 
 export function listPublicMethods() {
@@ -333,7 +443,7 @@ export async function dispatchDeclaredMethod(name: string, args: HandlerArgs = {
     throw new Error(`Unknown method manifest: ${name}`)
   }
 
-  verifyMethodRequirements(manifest)
+  await verifyMethodRequirements(manifest)
 
   const normalizedArgs = validateAndNormalizeArgs(manifest, args)
 

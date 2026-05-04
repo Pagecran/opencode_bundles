@@ -14,6 +14,7 @@ Monorepo source des bundles OpenCode Pagecran.
 - `BUNDLE_AUTHORING.md` : guide operationnel pour ajouter ou modifier des bundles et methodes
 - `docs/archive/` : anciennes specs conservees pour reference historique
 - `scripts/build_bundle.ps1` : staging local et publication sur le NAS
+- `scripts/check_all.ps1` : validation repo active bundles + build local
 - `scripts/sync_runtime.ps1` : synchronisation et verification des copies `_runtime/`
 - `dist/` : sortie generee localement
 
@@ -54,6 +55,9 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 # verifier que les copies vendored du runtime partage sont a jour
 .\scripts\sync_runtime.ps1 -CheckOnly
+
+# lancer la validation complete des bundles actifs
+.\scripts\check_all.ps1
 ```
 
 Publication par defaut vers :

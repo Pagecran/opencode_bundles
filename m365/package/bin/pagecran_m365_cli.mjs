@@ -3,11 +3,32 @@ import { homedir } from "node:os"
 import { dirname, join } from "node:path"
 
 const GRAPH_BASE_URL = "https://graph.microsoft.com/v1.0"
-const DEFAULT_TENANT_ID = process.env.PAGECRAN_M365_TENANT_ID || process.env.PAGECRAN_TEAMS_TENANT_ID || "common"
+const DEFAULT_APP_NAME = "TeamsPascale"
+const DEFAULT_CLIENT_ID = "674f3d17-5a27-417b-bcff-bfea2e61447b"
+const DEFAULT_TENANT_ID =
+  process.env.PAGECRAN_M365_TENANT_ID ||
+  process.env.PAGECRAN_TEAMS_TENANT_ID ||
+  "2fa485e4-1eee-4081-8445-98037b332c71"
 const DEFAULT_SCOPES = (
   process.env.PAGECRAN_M365_SCOPES ||
   process.env.PAGECRAN_TEAMS_SCOPES ||
-  "offline_access openid profile User.Read Files.Read.All Sites.Read.All"
+  [
+    "offline_access",
+    "openid",
+    "profile",
+    "User.Read",
+    "Files.ReadWrite.All",
+    "Sites.ReadWrite.All",
+    "Chat.Read",
+    "Chat.ReadWrite",
+    "Team.ReadBasic.All",
+    "Channel.ReadBasic.All",
+    "ChannelMessage.Read.All",
+    "ChannelMessage.Send",
+    "Mail.Read",
+    "Mail.Send",
+    "MailboxSettings.ReadWrite"
+  ].join(" ")
 )
   .split(/[\s,]+/)
   .map((item) => item.trim())
@@ -59,12 +80,27 @@ function removeFileIfExists(filePath) {
 }
 
 function getClientId() {
-  const value = process.env.PAGECRAN_M365_CLIENT_ID || process.env.PAGECRAN_TEAMS_CLIENT_ID
-  if (!value) {
-    throw new Error("Set PAGECRAN_M365_CLIENT_ID before using the Microsoft 365 CLI.")
-  }
+  return process.env.PAGECRAN_M365_CLIENT_ID || process.env.PAGECRAN_TEAMS_CLIENT_ID || DEFAULT_CLIENT_ID
+}
 
-  return value
+function getScopeList(scopeString) {
+  return String(scopeString || "")
+    .split(/[\s,]+/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function buildScopeString(scopes) {
+  return [...new Set(scopes)].join(" ")
+}
+
+function mergeScopes(...scopeLists) {
+  return buildScopeString(scopeLists.flatMap((scopeList) => scopeList || "").flatMap((value) => getScopeList(value)))
+}
+
+function hasAllScopes(availableScopes, requiredScopes) {
+  const available = new Set(getScopeList(availableScopes).map((scope) => scope.toLowerCase()))
+  return getScopeList(requiredScopes).every((scope) => available.has(scope.toLowerCase()))
 }
 
 function buildOAuthUrl(tenantId, leaf) {
@@ -135,17 +171,92 @@ function clearAuth() {
   removeFileIfExists(AUTH_FILE_PATH)
 }
 
-async function authStart() {
+function getStatusPayload() {
+  return {
+    appName: DEFAULT_APP_NAME,
+    defaults: {
+      clientId: getClientId(),
+      tenantId: DEFAULT_TENANT_ID,
+      scope: DEFAULT_SCOPES,
+      scopeList: getScopeList(DEFAULT_SCOPES)
+    },
+    auth: loadAuth(),
+    pending: loadPendingAuth()
+  }
+}
+
+async function authStart(requestedScopes = DEFAULT_SCOPES) {
   const clientId = getClientId()
+  const scope = mergeScopes(DEFAULT_SCOPES, requestedScopes)
+
+  try {
+    const auth = await getValidAuth()
+    if (auth.clientId === clientId && hasAllScopes(auth.scope, scope)) {
+      console.log(
+        JSON.stringify(
+          {
+            authenticated: true,
+            alreadyAuthenticated: true,
+            appName: DEFAULT_APP_NAME,
+            clientId: auth.clientId,
+            tenantId: auth.tenantId,
+            scope: auth.scope,
+            scopeList: getScopeList(auth.scope),
+            authFile: AUTH_FILE_PATH,
+            expiresAt: auth.expiresAt
+          },
+          null,
+          2
+        )
+      )
+      return true
+    }
+  } catch {
+    // No valid stored auth yet.
+  }
+
+  const pending = loadPendingAuth()
+  if (
+    pending &&
+    pending.expiresAt > Date.now() &&
+    pending.clientId === clientId &&
+    pending.tenantId === DEFAULT_TENANT_ID &&
+    hasAllScopes(pending.scope, scope)
+  ) {
+    console.log(
+      JSON.stringify(
+        {
+          authenticated: false,
+          autoStarted: false,
+          pending: true,
+          appName: DEFAULT_APP_NAME,
+          clientId,
+          tenantId: DEFAULT_TENANT_ID,
+          scope: pending.scope,
+          scopeList: getScopeList(pending.scope),
+          userCode: pending.userCode,
+          verificationUri: pending.verificationUri,
+          verificationUriComplete: pending.verificationUriComplete,
+          expiresAt: pending.expiresAt,
+          authFile: AUTH_FILE_PATH,
+          pendingAuthFile: PENDING_AUTH_FILE_PATH
+        },
+        null,
+        2
+      )
+    )
+    return false
+  }
+
   const payload = await postForm(buildOAuthUrl(DEFAULT_TENANT_ID, "devicecode"), {
     client_id: clientId,
-    scope: DEFAULT_SCOPES
+    scope
   })
 
-  const pending = {
+  const startedPending = {
     tenantId: DEFAULT_TENANT_ID,
     clientId,
-    scope: DEFAULT_SCOPES,
+    scope,
     deviceCode: payload.device_code,
     userCode: payload.user_code,
     verificationUri: payload.verification_uri,
@@ -154,14 +265,58 @@ async function authStart() {
     expiresAt: Date.now() + Number(payload.expires_in || 900) * 1000,
     message: payload.message || null
   }
-  savePendingAuth(pending)
-  console.log(JSON.stringify(pending, null, 2))
+  savePendingAuth(startedPending)
+  console.log(
+    JSON.stringify(
+      {
+        authenticated: false,
+        autoStarted: true,
+        pending: true,
+        appName: DEFAULT_APP_NAME,
+        clientId,
+        tenantId: DEFAULT_TENANT_ID,
+        scope,
+        scopeList: getScopeList(scope),
+        userCode: startedPending.userCode,
+        verificationUri: startedPending.verificationUri,
+        verificationUriComplete: startedPending.verificationUriComplete,
+        expiresAt: startedPending.expiresAt,
+        authFile: AUTH_FILE_PATH,
+        pendingAuthFile: PENDING_AUTH_FILE_PATH
+      },
+      null,
+      2
+    )
+  )
+  return false
 }
 
 async function authPoll() {
   const pending = loadPendingAuth()
   if (!pending?.deviceCode) {
-    throw new Error("No pending device login. Run auth-start first.")
+    try {
+      const auth = await getValidAuth()
+      console.log(
+        JSON.stringify(
+          {
+            authenticated: true,
+            pending: false,
+            appName: DEFAULT_APP_NAME,
+            authFile: AUTH_FILE_PATH,
+            clientId: auth.clientId,
+            tenantId: auth.tenantId,
+            scope: auth.scope,
+            scopeList: getScopeList(auth.scope),
+            expiresAt: auth.expiresAt
+          },
+          null,
+          2
+        )
+      )
+      return
+    } catch {
+      throw new Error("No pending device login. Run auth-start first.")
+    }
   }
 
   while (Date.now() < pending.expiresAt) {
@@ -240,8 +395,23 @@ async function getValidAuth(forceRefresh = false) {
   return refreshStoredAuth(auth)
 }
 
+async function ensureCliAuth(requiredScopes = DEFAULT_SCOPES) {
+  try {
+    return await getValidAuth()
+  } catch {
+    // Fall through and auto-start device login.
+  }
+
+  await authStart(requiredScopes)
+  return null
+}
+
 async function requestGraph(method, path, bodyText) {
-  let auth = await getValidAuth()
+  let auth = await ensureCliAuth()
+  if (!auth) {
+    return
+  }
+
   const url = path.startsWith("https://") ? path : `${GRAPH_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`
   const parsedBody = bodyText ? JSON.parse(bodyText) : undefined
 
@@ -278,7 +448,7 @@ const [command, ...rest] = process.argv.slice(2)
 try {
   switch (command) {
     case "status":
-      console.log(JSON.stringify({ auth: loadAuth(), pending: loadPendingAuth() }, null, 2))
+      console.log(JSON.stringify(getStatusPayload(), null, 2))
       break
     case "auth-start":
       await authStart()

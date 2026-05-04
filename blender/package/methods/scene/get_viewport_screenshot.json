@@ -1,9 +1,20 @@
 {
   "name": "get_viewport_screenshot",
   "domain": "scene",
-  "description": "Get viewport screenshot.",
+  "description": "Capture the current 3D viewport and return a temp image path.",
   "kind": "host-backed",
   "risk": "read",
+  "args": {
+    "max_size": {
+      "type": "integer",
+      "description": "Optional maximum image dimension in pixels.",
+      "default": 800
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Viewport capture metadata. The plugin stores the PNG to a temp path and returns image_path."
+  },
   "execution": {
     "strategy": "host_function",
     "package": "opencode_blender_bundle",

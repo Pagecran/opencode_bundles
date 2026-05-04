@@ -1,0 +1,32 @@
+{
+  "name": "analyze_vrscene_file",
+  "domain": "shader",
+  "description": "Inspect a .vrscene file and summarize convertible V-Ray material blocks, textures, triplanar usage, and randomizer usage.",
+  "kind": "host-backed",
+  "risk": "read",
+  "args": {
+    "filepath": {
+      "type": "string",
+      "required": true,
+      "description": "Absolute path to the .vrscene file to inspect."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Analysis summary for the VRScene file, including discovered material blocks and UVW helper usage."
+  },
+  "execution": {
+    "strategy": "host_function",
+    "package": "opencode_blender_bundle",
+    "module": "handlers_materials",
+    "function": "analyze_vrscene_file"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_code"
+    ]
+  },
+  "verify": {
+    "strategy": "none"
+  }
+}

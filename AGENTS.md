@@ -59,6 +59,8 @@ Last reviewed: 2026-04-22.
 - There is no dedicated linter configured.
 - Use TypeScript compile checks as the main static validation step for TS files.
 - Each bundle has its own `package.json` and `tsconfig.json`; there is no root workspace toolchain.
+- Root convenience validation script:
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\check_all.ps1`
 - Run from the relevant bundle `package/` directory:
   - `bunx tsc --noEmit -p tsconfig.json`
 - Equivalent root-relative form:
@@ -69,6 +71,8 @@ Last reviewed: 2026-04-22.
 - Microsoft 365 bundle coherence check:
   - from `m365\package\`: `bun run check:bundle`
   - root-relative: `bun --cwd .\m365\package run check:bundle`
+- Shared runtime type check:
+  - from `packages\bundle-runtime\`: `bun run check:types`
 - Blender bundle coherence check:
   - root-relative: `bun --cwd .\blender\package run check:bundle`
 - Unreal bundle coherence check:

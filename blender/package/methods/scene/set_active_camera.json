@@ -1,9 +1,20 @@
 {
   "name": "set_active_camera",
   "domain": "scene",
-  "description": "Set active camera.",
+  "description": "Set the active render camera for the current scene.",
   "kind": "host-backed",
   "risk": "write",
+  "args": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "description": "Exact Blender camera object name."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Camera selection summary containing the active camera name."
+  },
   "execution": {
     "strategy": "host_function",
     "package": "opencode_blender_bundle",
@@ -14,5 +25,9 @@
     "bridgeMethods": [
       "execute_code"
     ]
+  },
+  "verify": {
+    "strategy": "followup_method",
+    "method": "get_scene_info"
   }
 }

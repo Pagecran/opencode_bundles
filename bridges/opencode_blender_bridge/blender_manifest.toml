@@ -2,7 +2,7 @@ schema_version = "1.0.0"
 
 id = "opencode_blender_bridge"
 name = "OpenCode Blender Bridge"
-version = "0.3.0"
+version = "0.3.1"
 type = "add-on"
 tagline = "Minimal socket bridge for OpenCode bundle-side workflows"
 maintainer = "Studio Pagecran <contact@pagecran.com>"

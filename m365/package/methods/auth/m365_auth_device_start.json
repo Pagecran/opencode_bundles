@@ -24,10 +24,7 @@
     "type": "object"
   },
   "requires": {
-    "auth": false,
-    "env": [
-      "PAGECRAN_M365_CLIENT_ID or PAGECRAN_TEAMS_CLIENT_ID"
-    ]
+    "auth": false
   },
   "execution": {
     "strategy": "direct_api",

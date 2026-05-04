@@ -638,7 +638,4 @@ export const UnrealPlugin: Plugin = async () => {
   }
 }
 
-export default {
-  id: "unreal",
-  server: UnrealPlugin
-}
+export default UnrealPlugin

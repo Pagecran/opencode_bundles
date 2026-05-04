@@ -9,11 +9,13 @@
 
 """Shot Manager handlers for the OpenCode Blender bundle runtime."""
 
-import bpy
+# pyright: reportMissingImports=false, reportUnknownVariableType=false, reportUnknownMemberType=false, reportUnknownArgumentType=false, reportUnknownParameterType=false, reportAttributeAccessIssue=false
+
+import bpy  # type: ignore[import-not-found]
 
 
 def register_handlers():
-    from . import register_handler
+    from . import register_handler  # type: ignore[attr-defined]
 
     register_handler("get_shot_manager_status", get_shot_manager_status)
     register_handler("get_shot_list", get_shot_list)
@@ -41,6 +43,106 @@ def _get_shots():
     if not props.node_tree:
         return []
     return list(props.node_tree.shots)
+
+
+def _normalize_value(value):
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+
+    if isinstance(value, bpy.types.ID):
+        return value.name
+
+    if hasattr(value, "to_list"):
+        try:
+            return list(value.to_list())
+        except Exception:
+            pass
+
+    if isinstance(value, dict):
+        return {key: _normalize_value(item) for key, item in value.items()}
+
+    try:
+        return [_normalize_value(item) for item in list(value)]
+    except Exception:
+        return str(value)
+
+
+def _lookup_prop_safe(shot, prop_id, full=False):
+    if not hasattr(shot, "lookup_prop"):
+        return None
+
+    try:
+        return shot.lookup_prop(prop_id, full=full)
+    except Exception:
+        return None
+
+
+def _find_shot(shot_name):
+    for shot in _get_shots():
+        label = _lookup_prop_safe(shot, "label")
+        if shot.name == shot_name or label == shot_name:
+            return shot
+    return None
+
+
+def _describe_shot_property(shot, prop):
+    icon = "ERROR"
+    source = None
+    value = prop.error_message if hasattr(prop, "error_message") else None
+
+    resolved = _lookup_prop_safe(shot, prop.name, full=True)
+    if resolved is not None:
+        icon, source, _prop_type, value = resolved
+
+    return {
+        "override": bool(getattr(prop, "override", False)),
+        "rna_path": getattr(prop, "rna_path", ""),
+        "rna_type": getattr(prop, "rna_type", ""),
+        "source_icon": icon,
+        "source_name": getattr(source, "parent_id", None) or getattr(source, "name", None),
+        "value": _normalize_value(value),
+        "error": getattr(prop, "error_message", "") or None,
+    }
+
+
+def _get_window_override_context():
+    wm = getattr(bpy.context, "window_manager", None)
+    if wm is None:
+        return None
+
+    preferred_areas = ("PROPERTIES", "VIEW_3D", "DOPESHEET_EDITOR", "OUTLINER")
+
+    for window in wm.windows:
+        screen = window.screen
+        if screen is None:
+            continue
+
+        area = None
+        for area_type in preferred_areas:
+            area = next((candidate for candidate in screen.areas if candidate.type == area_type), None)
+            if area is not None:
+                break
+
+        if area is None and screen.areas:
+            area = screen.areas[0]
+
+        if area is None:
+            continue
+
+        override = {
+            "window": window,
+            "screen": screen,
+            "area": area,
+            "scene": bpy.context.scene,
+        }
+
+        region = next((candidate for candidate in area.regions if candidate.type == "WINDOW"), None)
+        if region is not None:
+            override["region"] = region
+
+        return override
+
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -83,35 +185,43 @@ def get_shot_list():
 
 def get_shot_details(shot_name):
     """Get detailed info about a specific shot."""
-    shots = _get_shots()
-    for shot in shots:
-        if shot.name == shot_name:
-            details = {
-                "name": shot.name,
-                "label": shot.label if hasattr(shot, "label") else "",
-                "enabled": shot.enable,
-                "start_frame": shot.start_frame_render,
-                "end_frame": shot.end_frame_render,
-                "still_mode": shot.still_mode,
-                "notes": shot.notes if hasattr(shot, "notes") else "",
-            }
+    shot = _find_shot(shot_name)
+    if shot is None:
+        raise ValueError(f"Shot not found: {shot_name}")
 
-            if hasattr(shot, "properties"):
-                overrides = {}
-                for prop in shot.properties:
-                    overrides[prop.prop_id] = {
-                        "name": prop.name if hasattr(prop, "name") else prop.prop_id,
-                        "enabled": prop.enable if hasattr(prop, "enable") else True,
-                    }
-                details["overrides"] = overrides
+    details = {
+        "name": shot.name,
+        "label": _lookup_prop_safe(shot, "label") or getattr(shot, "label", ""),
+        "suffix": _lookup_prop_safe(shot, "suffix") or getattr(shot, "suffix", ""),
+        "enabled": bool(getattr(shot, "enable", True)),
+        "start_frame": _normalize_value(_lookup_prop_safe(shot, "Start")),
+        "end_frame": _normalize_value(_lookup_prop_safe(shot, "End")),
+        "render_start_frame": getattr(shot, "start_frame_render", None),
+        "render_end_frame": getattr(shot, "end_frame_render", None),
+        "still_mode": _normalize_value(_lookup_prop_safe(shot, "still_mode")),
+        "is_default": bool(getattr(shot, "is_default", False)),
+        "source_id": getattr(shot, "source_id", None),
+        "notes": getattr(shot, "notes", "") if hasattr(shot, "notes") else "",
+        "notes_file": str(getattr(shot, "notes_file", "")) if hasattr(shot, "notes_file") else "",
+        "rendered": bool(getattr(shot, "rendered", False)),
+        "rendering": bool(getattr(shot, "rendering", False)),
+    }
 
-            camera_prop = shot.lookup_prop("camera") if hasattr(shot, "lookup_prop") else None
-            if camera_prop and hasattr(camera_prop, "value"):
-                details["camera"] = str(camera_prop.value)
+    camera = _lookup_prop_safe(shot, "Camera")
+    if camera not in (None, "ERROR", "None"):
+        details["camera"] = _normalize_value(camera)
 
-            return details
+    primary_layer = _lookup_prop_safe(shot, "primary")
+    if primary_layer not in (None, "ERROR", "None"):
+        details["primary_layer"] = _normalize_value(primary_layer)
 
-    raise ValueError(f"Shot not found: {shot_name}")
+    if hasattr(shot, "properties"):
+        details["overrides"] = {
+            prop.name: _describe_shot_property(shot, prop)
+            for prop in shot.properties
+        }
+
+    return details
 
 
 # ---------------------------------------------------------------------------
@@ -134,7 +244,7 @@ def create_shot(name=None, start_frame=None, end_frame=None, camera=None):
         from bl_ext.system.shot_manager.globals import (
             skip_update, get_all_shot_grps, shot_change,
             update_visibility_set,
-        )
+        )  # type: ignore[import-not-found]
     except ImportError:
         raise RuntimeError(
             "Cannot import Shot Manager internals. "
@@ -342,10 +452,41 @@ def set_shot_manager_render_path(path, redirect=True):
 # ---------------------------------------------------------------------------
 def launch_batch_render():
     """Launch a batch render of all enabled shots."""
-    _get_sm_props()
+    props = _get_sm_props()
+
+    if not bpy.data.is_saved:
+        return {"status": "error", "message": "Project must be saved before batch render can start"}
+
+    total_queue_count = int(getattr(props, "total_queue_count", 0) or 0)
+    if total_queue_count <= 0:
+        return {"status": "error", "message": "No shots have been queued for render"}
+
+    override = _get_window_override_context()
+    if override is None:
+        return {
+            "status": "error",
+            "message": "No Blender window context available to start Shot Manager batch render",
+        }
 
     try:
-        bpy.ops.wm.render_sm()
-        return {"status": "started", "message": "Batch render started"}
+        with bpy.context.temp_override(**override):
+            result = bpy.ops.wm.render_sm()
+
+        result_flags = sorted(result) if isinstance(result, set) else [str(result)]
+        if "RUNNING_MODAL" in result_flags:
+            status = "started"
+        elif "FINISHED" in result_flags:
+            status = "finished"
+        elif "CANCELLED" in result_flags:
+            status = "cancelled"
+        else:
+            status = "unknown"
+
+        return {
+            "status": status,
+            "message": "Batch render started" if status == "started" else "Shot Manager render operator returned",
+            "result": result_flags,
+            "queued_shots": total_queue_count,
+        }
     except Exception as exc:
         return {"status": "error", "message": str(exc)}
