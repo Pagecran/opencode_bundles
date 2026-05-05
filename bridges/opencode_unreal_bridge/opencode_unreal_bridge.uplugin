@@ -6,6 +6,7 @@
   "Description": "TCP JSON bridge for the OpenCode Unreal bundle, focused on linear animation and rendering workflows.",
   "Category": "Scripting",
   "CreatedBy": "Pagecran",
+  "EnabledByDefault": true,
   "CanContainContent": false,
   "IsBetaVersion": true,
   "IsExperimentalVersion": true,
@@ -13,6 +14,10 @@
   "Plugins": [
     {
       "Name": "MovieRenderPipeline",
+      "Enabled": true
+    },
+    {
+      "Name": "PythonScriptPlugin",
       "Enabled": true
     }
   ],
