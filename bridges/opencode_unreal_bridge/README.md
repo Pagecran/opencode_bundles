@@ -59,7 +59,9 @@ This plugin is intended to ship with the Unreal fork / engine-side source rather
 Typical target:
 
 ```text
-D:/EpicGames/Unreal/.../opencode_unreal_bridge/
+D:/UnrealEngine/Engine/Plugins/Developer/opencode_unreal_bridge/
 ```
+
+The plugin descriptor has `EnabledByDefault: true` so it is enabled for editor projects by default when shipped inside the custom engine distribution.
 
 Then regenerate project files or rebuild the editor module and reopen the editor.
