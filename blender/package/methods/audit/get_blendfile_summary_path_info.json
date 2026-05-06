@@ -1,0 +1,25 @@
+{
+  "name": "get_blendfile_summary_path_info",
+  "domain": "audit",
+  "description": "Read basic path, size, and timestamp information for a .blend file on disk.",
+  "kind": "hostless",
+  "risk": "read",
+  "args": {
+    "blend_file": {
+      "type": "string",
+      "required": true,
+      "description": "Absolute or workspace-relative path to a .blend file."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Path metadata for the .blend file."
+  },
+  "execution": {
+    "strategy": "local_handler",
+    "handler": "audit.path_info"
+  },
+  "verify": {
+    "strategy": "none"
+  }
+}

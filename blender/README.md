@@ -57,6 +57,7 @@ The plugin exposes one primary workflow tool, `blender_request`, plus a few low-
 | `pagecran-blender-animation` | "animate this", "turntable", "keyframe" |
 | `pagecran-blender-shot-manager` | "Shot Manager", "shot list", "batch render" |
 | `pagecran-blender-docs` | "Blender API", "bpy docs", "Blender manual" |
+| `pagecran-blender-audit` | "audit blend", "missing files", "linked libraries", "preflight" |
 
 Each skill contains a **method catalog** (method names, parameter tables, types) and **domain knowledge** (Blender conventions, common patterns).
 
@@ -129,6 +130,24 @@ Documentation methods are local bundle methods and do not require Blender to be 
 - `search_blender_api_docs`
 - `search_blender_manual`
 - `get_blender_api_docs`
+
+## Offline Blend Audits
+
+The bundle can inspect `.blend` files on disk without a live bridge session:
+
+- `get_blendfile_summary_path_info`
+- `get_blendfile_summary_datablocks`
+- `get_blendfile_summary_missing_files`
+- `get_blendfile_summary_linked_libraries`
+
+The path-info method is local. Other audit methods launch Blender in background mode and resolve the executable in this order:
+
+1. `PAGECRAN_BLENDER_BIN`
+2. `BLENDER_PATH`
+3. `BLENDER_BIN`
+4. `blender` from `PATH`
+
+Offline audits read the file from disk; unsaved changes in an open Blender session are not included.
 
 ## VRScene Material Conversion
 

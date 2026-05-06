@@ -1,0 +1,33 @@
+{
+  "name": "get_blendfile_summary_missing_files",
+  "domain": "audit",
+  "description": "Open a .blend file with Blender in background mode and report missing external file references.",
+  "kind": "host-backed",
+  "risk": "read",
+  "args": {
+    "blend_file": {
+      "type": "string",
+      "required": true,
+      "description": "Absolute or workspace-relative path to a .blend file."
+    },
+    "timeout_seconds": {
+      "type": "number",
+      "description": "Optional Blender background process timeout in seconds."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Missing external file references grouped as structured records."
+  },
+  "requires": {
+    "externalBinary": "blender",
+    "env": ["PAGECRAN_BLENDER_BIN", "BLENDER_PATH", "BLENDER_BIN"]
+  },
+  "execution": {
+    "strategy": "host_cli",
+    "handler": "audit.missing_files"
+  },
+  "verify": {
+    "strategy": "none"
+  }
+}

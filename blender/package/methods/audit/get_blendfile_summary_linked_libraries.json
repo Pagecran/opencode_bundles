@@ -1,0 +1,33 @@
+{
+  "name": "get_blendfile_summary_linked_libraries",
+  "domain": "audit",
+  "description": "Open a .blend file with Blender in background mode and list linked libraries.",
+  "kind": "host-backed",
+  "risk": "read",
+  "args": {
+    "blend_file": {
+      "type": "string",
+      "required": true,
+      "description": "Absolute or workspace-relative path to a .blend file."
+    },
+    "timeout_seconds": {
+      "type": "number",
+      "description": "Optional Blender background process timeout in seconds."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Linked .blend libraries and their referenced data-blocks."
+  },
+  "requires": {
+    "externalBinary": "blender",
+    "env": ["PAGECRAN_BLENDER_BIN", "BLENDER_PATH", "BLENDER_BIN"]
+  },
+  "execution": {
+    "strategy": "host_cli",
+    "handler": "audit.linked_libraries"
+  },
+  "verify": {
+    "strategy": "none"
+  }
+}

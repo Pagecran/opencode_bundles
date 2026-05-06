@@ -3,6 +3,12 @@ import { ensureJsonObject } from "../_runtime/validators"
 import type { DispatchOptions, MethodManifest } from "../_runtime/types"
 
 import {
+  getBlendfileSummaryDatablocks,
+  getBlendfileSummaryLinkedLibraries,
+  getBlendfileSummaryMissingFiles,
+  getBlendfileSummaryPathInfo
+} from "./audit"
+import {
   getBlenderApiDocs,
   searchBlenderApiDocs,
   searchBlenderManual
@@ -13,7 +19,11 @@ type Handler = (params: Record<string, unknown>, timeoutMs?: number) => unknown 
 const handlers = new Map<string, Handler>([
   ["docs.search_api", searchBlenderApiDocs],
   ["docs.search_manual", searchBlenderManual],
-  ["docs.get_api", getBlenderApiDocs]
+  ["docs.get_api", getBlenderApiDocs],
+  ["audit.path_info", getBlendfileSummaryPathInfo],
+  ["audit.datablocks", getBlendfileSummaryDatablocks],
+  ["audit.missing_files", getBlendfileSummaryMissingFiles],
+  ["audit.linked_libraries", getBlendfileSummaryLinkedLibraries]
 ])
 
 function normalizeHandlerName(definition: MethodManifest) {

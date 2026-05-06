@@ -1,0 +1,33 @@
+{
+  "name": "get_blendfile_summary_datablocks",
+  "domain": "audit",
+  "description": "Open a .blend file with Blender in background mode and summarize data-block counts.",
+  "kind": "host-backed",
+  "risk": "read",
+  "args": {
+    "blend_file": {
+      "type": "string",
+      "required": true,
+      "description": "Absolute or workspace-relative path to a .blend file."
+    },
+    "timeout_seconds": {
+      "type": "number",
+      "description": "Optional Blender background process timeout in seconds."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Data-block counts, scenes, and render engines."
+  },
+  "requires": {
+    "externalBinary": "blender",
+    "env": ["PAGECRAN_BLENDER_BIN", "BLENDER_PATH", "BLENDER_BIN"]
+  },
+  "execution": {
+    "strategy": "host_cli",
+    "handler": "audit.datablocks"
+  },
+  "verify": {
+    "strategy": "none"
+  }
+}
