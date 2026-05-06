@@ -7,7 +7,7 @@ Last reviewed: 2026-04-22.
 ## Repo Overview
 
 - This is a small monorepo for Pagecran OpenCode bundles.
-- Primary bundle roots are `blender/`, `m365/`, `teams/`, and `unreal/`.
+- Primary bundle roots are `blender/`, `m365/`, and `unreal/`.
 - Architecture guidance lives in `ARCHITECTURE.md`; authoring guidance lives in `BUNDLE_AUTHORING.md`.
 - Canonical host-side bridge sources should live directly under `bridges/` at the repo root.
 - Shared runtime source lives in `packages/bundle-runtime/src` and is vendored into each active bundle under `package/_runtime`.
@@ -28,11 +28,9 @@ Last reviewed: 2026-04-22.
 - Build one bundle locally without publishing:
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle blender -SkipPublish`
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle m365 -SkipPublish`
-  - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle teams -SkipPublish`
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle unreal -SkipPublish`
 - Build all bundles locally without publishing:
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle all -SkipPublish`
-  - `-Bundle all` excludes deprecated bundles such as `teams`; build them explicitly if needed.
 - Build and publish a bundle to the default NAS target:
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle blender`
 - Sync host-side bridges manually into their target repos:
@@ -49,8 +47,6 @@ Last reviewed: 2026-04-22.
   - `powershell -ExecutionPolicy Bypass -File .\blender\install.ps1`
 - Install the Microsoft 365 bundle into the user's OpenCode config:
   - `powershell -ExecutionPolicy Bypass -File .\m365\install.ps1`
-- Install the Teams bundle into the user's OpenCode config:
-  - `powershell -ExecutionPolicy Bypass -File .\teams\install.ps1`
 - Install the Unreal bundle into the user's OpenCode config:
   - `powershell -ExecutionPolicy Bypass -File .\unreal\install.ps1`
 - Append `-SkipBunInstall` if you want the installer to skip dependency installation.
@@ -69,7 +65,6 @@ Last reviewed: 2026-04-22.
 - Equivalent root-relative form:
   - `bunx tsc --noEmit -p .\blender\package\tsconfig.json`
   - `bunx tsc --noEmit -p .\m365\package\tsconfig.json`
-  - `bunx tsc --noEmit -p .\teams\package\tsconfig.json`
   - `bunx tsc --noEmit -p .\unreal\package\tsconfig.json`
 - Microsoft 365 bundle coherence check:
   - from `m365\package\`: `bun run check:bundle`
@@ -100,10 +95,6 @@ Last reviewed: 2026-04-22.
   - `node .\m365\package\bin\pagecran_m365_cli.mjs status`
 - Microsoft 365 Graph smoke test after auth:
   - `node .\m365\package\bin\pagecran_m365_cli.mjs ping`
-- Teams CLI auth status:
-  - `node .\teams\package\bin\pagecran_teams_cli.mjs status`
-- Teams Graph smoke test after auth:
-  - `node .\teams\package\bin\pagecran_teams_cli.mjs request GET /me`
 - Unreal CLI endpoint check:
   - `node .\unreal\package\bin\pagecran_unreal_cli.mjs endpoint --pretty`
 - Unreal bridge ping:
@@ -150,7 +141,7 @@ Last reviewed: 2026-04-22.
 - Use `camelCase` for TS variables, functions, and internal helpers.
 - Use `UPPER_SNAKE_CASE` for module-level constants.
 - Use `snake_case` for external tool arguments and protocol fields that are part of the public interface.
-- Keep tool names descriptive and stable, for example `teams_read_channel_messages` and `unreal_events_wait`.
+- Keep tool names descriptive and stable, for example `m365_teams_read_channel_messages` and `unreal_events_wait`.
 - In PowerShell, use `Verb-Noun` function names.
 - In Python, use `snake_case` for functions and variables.
 
@@ -160,7 +151,7 @@ Last reviewed: 2026-04-22.
 - Validate required inputs before performing file, network, or auth work.
 - Preserve the current pattern of best-effort logging wrapped in `try/catch` that never blocks the main tool path.
 - Clean up timers, sockets, and pending requests on both error and manual close paths.
-- Retry only where the existing code already establishes a pattern, such as Teams token refresh after a 401.
+- Retry only where the existing code already establishes a pattern, such as Microsoft Graph token refresh after a 401.
 - Prefer returning structured error context over vague messages.
 - Keep CLI exit codes meaningful: success `0`, fatal runtime or usage errors `1`, request-level logical errors `2` where already established.
 
@@ -197,7 +188,6 @@ Last reviewed: 2026-04-22.
 - Read `ARCHITECTURE.md` and `BUNDLE_AUTHORING.md` before making bundle-architecture changes.
 - Read the bundle README before changing a bundle-specific plugin or skill.
 - For Blender and Unreal changes, inspect the transport layer, CLI, and relevant skill docs together.
-- For Teams changes, verify auth, Graph path handling, and fuzzy-resolution helpers together.
 - For Microsoft 365 changes, verify auth, Graph path handling, manifest coherence, and bundle runtime alignment together.
 - After TS edits, run `tsc --noEmit` for the touched bundle.
 - After CLI or protocol edits, run at least one smoke test command relevant to the changed path.
