@@ -1,9 +1,20 @@
 {
   "name": "delete_material",
   "domain": "shader",
-  "description": "Delete material.",
+  "description": "Delete one material by exact Blender name.",
   "kind": "host-backed",
   "risk": "destructive",
+  "args": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "description": "Exact Blender material name to remove."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Deletion result containing the removed material name."
+  },
   "execution": {
     "strategy": "host_function",
     "package": "opencode_blender_bundle",
@@ -14,5 +25,9 @@
     "bridgeMethods": [
       "execute_code"
     ]
+  },
+  "verify": {
+    "strategy": "followup_method",
+    "method": "list_materials"
   }
 }

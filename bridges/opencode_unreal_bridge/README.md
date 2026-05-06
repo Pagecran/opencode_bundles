@@ -62,6 +62,14 @@ Typical target:
 D:/UnrealEngine/Engine/Plugins/Developer/opencode_unreal_bridge/
 ```
 
+On some workstations the engine root is instead:
+
+```text
+D:/EpicGames/UnrealEngine/Engine/Plugins/Developer/opencode_unreal_bridge/
+```
+
+Use the local engine repo path for the workstation you are on.
+
 The plugin descriptor has `EnabledByDefault: true` so it is enabled for editor projects by default when shipped inside the custom engine distribution.
 
 Then regenerate project files or rebuild the editor module and reopen the editor.

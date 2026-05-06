@@ -14,6 +14,7 @@ Monorepo source des bundles OpenCode Pagecran.
 - `BUNDLE_AUTHORING.md` : guide operationnel pour ajouter ou modifier des bundles et methodes
 - `docs/archive/` : anciennes specs conservees pour reference historique
 - `scripts/build_bundle.ps1` : staging local et publication sur le NAS
+- `scripts/sync_bridges.ps1` : copie manuelle des bridges host-side vers leurs repos cibles
 - `scripts/check_all.ps1` : validation repo active bundles + build local
 - `scripts/sync_runtime.ps1` : synchronisation et verification des copies `_runtime/`
 - `dist/` : sortie generee localement
@@ -58,6 +59,9 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 # lancer la validation complete des bundles actifs
 .\scripts\check_all.ps1
+
+# verifier ou seront copies les bridges host-side
+.\scripts\sync_bridges.ps1 -Bridge all -CheckOnly
 ```
 
 Publication par defaut vers :
@@ -71,6 +75,11 @@ Le script publie un dossier versionne directement sous le bundle, par exemple :
 Le meme layout est genere localement dans `dist/`, par exemple :
 
 - `D:\opencode_bundles\dist\blender\1.0.0`
+
+Les bridges host-side ne passent pas par le NAS bundle. Ils restent dans leurs repos cibles :
+
+- Blender : `R:\Workgroup_Blender\Extension\System\opencode_blender_bridge`
+- Unreal : `D:\EpicGames\UnrealEngine\Engine\Plugins\Developer\opencode_unreal_bridge` ou `D:\UnrealEngine\Engine\Plugins\Developer\opencode_unreal_bridge`
 
 ## Ajouter un nouveau bundle
 

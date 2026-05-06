@@ -2,5 +2,27 @@
   "name": "unreal",
   "displayName": "Unreal",
   "version": "0.1.0",
-  "publishDirName": "unreal"
+  "publishDirName": "unreal",
+  "deployment": {
+    "plugin_file": "unreal.ts",
+    "bundle_dir": "bundles\\unreal",
+    "hash_marker": ".pagecran-unreal-bundle.hash",
+    "bin_files": [
+      "bin\\pagecran_unreal_cli.mjs"
+    ],
+    "skill_dirs": [
+      "skills\\pagecran-unreal-editor",
+      "skills\\pagecran-unreal-sequencer",
+      "skills\\pagecran-unreal-data-layers",
+      "skills\\pagecran-unreal-movie-render-graph",
+      "skills\\pagecran-unreal-shading"
+    ],
+    "auth_files": [],
+    "legacy_cleanup": {
+      "files": [],
+      "dirs": [
+        "skills\\pagecran-unreal-build"
+      ]
+    }
+  }
 }

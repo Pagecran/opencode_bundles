@@ -1,9 +1,14 @@
 {
   "name": "get_scene_info",
   "domain": "scene",
-  "description": "Get scene info.",
+  "description": "Read the active scene summary including objects, camera, frame range, and render settings.",
   "kind": "host-backed",
   "risk": "read",
+  "args": {},
+  "returns": {
+    "type": "object",
+    "description": "Scene summary containing the object list, active camera, frame range, render engine, and resolution."
+  },
   "execution": {
     "strategy": "host_function",
     "package": "opencode_blender_bundle",
@@ -14,5 +19,8 @@
     "bridgeMethods": [
       "execute_code"
     ]
+  },
+  "verify": {
+    "strategy": "none"
   }
 }

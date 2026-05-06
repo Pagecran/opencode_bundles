@@ -3,6 +3,53 @@ import { isRecord } from "./validators"
 
 type JsonRecord = Record<string, unknown>
 
+function formatExampleValue(argManifest: MethodArgManifest): string {
+  const enumValues = readEnumValues(argManifest)
+  if (enumValues.length > 0) {
+    return JSON.stringify(enumValues[0])
+  }
+
+  switch (argManifest.type) {
+    case "string":
+      return JSON.stringify("<string>")
+    case "integer":
+    case "number":
+      return "0"
+    case "boolean":
+      return "true"
+    case "object":
+      return "{ ... }"
+    case "array":
+      return "[]"
+    case "any":
+      return JSON.stringify("<value>")
+    default:
+      return JSON.stringify("<value>")
+  }
+}
+
+function buildMethodCallExample(manifest: MethodManifest) {
+  const args = manifest.args || {}
+  const requiredArgs = Object.entries(args).filter(([, argManifest]) => argManifest.required)
+
+  if (requiredArgs.length === 0) {
+    return `{ method: "${manifest.name}" }`
+  }
+
+  const paramEntries = requiredArgs.map(
+    ([argName, argManifest]) => `${argName}: ${formatExampleValue(argManifest)}`
+  )
+
+  return `{ method: "${manifest.name}", params: { ${paramEntries.join(", ")} } }`
+}
+
+function getParamsNestingHint(manifest: MethodManifest) {
+  return (
+    `All method arguments must be nested inside params. ` +
+    `Example tool input: ${buildMethodCallExample(manifest)}`
+  )
+}
+
 function readEnumValues(argManifest: MethodArgManifest) {
   return Array.isArray(argManifest.enum) ? argManifest.enum : []
 }
@@ -102,7 +149,17 @@ export function validateAndNormalizeArgs(manifest: MethodManifest, rawArgs: Json
 
   for (const key of Object.keys(rawArgs)) {
     if (!knownArgNames.has(key)) {
-      throw new Error(`Unexpected argument for ${manifest.name}: ${key}`)
+      if (knownArgNames.size === 0) {
+        throw new Error(
+          `Method ${manifest.name} does not accept params.${key}. ${getParamsNestingHint(manifest)}`
+        )
+      }
+
+      throw new Error(
+        `Unexpected argument for ${manifest.name}: params.${key}. ` +
+          `Allowed method arguments: ${Array.from(knownArgNames).join(", ")}. ` +
+          getParamsNestingHint(manifest)
+      )
     }
   }
 
@@ -115,12 +172,15 @@ export function validateAndNormalizeArgs(manifest: MethodManifest, rawArgs: Json
         continue
       }
       if (argManifest.required) {
-        throw new Error(`Missing required argument for ${manifest.name}: ${argName}`)
+        throw new Error(
+          `Missing required argument for ${manifest.name}: params.${argName}. ` +
+            getParamsNestingHint(manifest)
+        )
       }
       continue
     }
 
-    normalizedArgs[argName] = validateAndNormalizeValue(rawValue, argManifest, argName)
+    normalizedArgs[argName] = validateAndNormalizeValue(rawValue, argManifest, `params.${argName}`)
   }
 
   return normalizedArgs

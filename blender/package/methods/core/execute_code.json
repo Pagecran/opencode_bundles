@@ -4,6 +4,17 @@
   "description": "Execute arbitrary Python code inside Blender.",
   "kind": "host-backed",
   "risk": "destructive",
+  "args": {
+    "code": {
+      "type": "string",
+      "required": true,
+      "description": "Python source code to execute inside Blender."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Bridge execution result containing stdout-derived result data when present."
+  },
   "execution": {
     "strategy": "bridge_method",
     "method": "execute_code"
@@ -12,5 +23,8 @@
     "bridgeMethods": [
       "execute_code"
     ]
+  },
+  "verify": {
+    "strategy": "none"
   }
 }

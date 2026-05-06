@@ -1,9 +1,20 @@
 {
   "name": "get_object_info",
   "domain": "scene",
-  "description": "Get object info.",
+  "description": "Read detailed information for one Blender object.",
   "kind": "host-backed",
   "risk": "read",
+  "args": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "description": "Exact Blender object name."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Object summary including transform, hierarchy, mesh stats, material slots, and modifiers when applicable."
+  },
   "execution": {
     "strategy": "host_function",
     "package": "opencode_blender_bundle",
@@ -14,5 +25,8 @@
     "bridgeMethods": [
       "execute_code"
     ]
+  },
+  "verify": {
+    "strategy": "none"
   }
 }

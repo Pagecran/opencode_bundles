@@ -9,8 +9,8 @@ Deployed to `C:\Users\<user>\.config\opencode\` — available from any repo.
 ```
   OpenCode Agent
        |
-       |  6 tools (blender_request, connect, disconnect, events, ping)
-       v
+       |  primary tool: blender_request
+        v
   blender.ts plugin  ──  persistent TCP socket + bundle runtime dispatcher
        |
        v
@@ -20,7 +20,7 @@ Deployed to `C:\Users\<user>\.config\opencode\` — available from any repo.
    Blender Python API (bpy)
 ```
 
-The plugin exposes **6 generic tools**. Domain knowledge (method names, parameters, workflows) lives in **skills** that are loaded on-demand, keeping the base token cost minimal.
+The plugin exposes one primary workflow tool, `blender_request`, plus a few low-level bridge/debug helpers. Domain knowledge (method names, parameters, workflows) lives in **skills** that are loaded on-demand, keeping the base token cost minimal.
 
 ## What is included
 
@@ -38,24 +38,21 @@ The plugin exposes **6 generic tools**. Domain knowledge (method names, paramete
 
 | Tool | Purpose |
 |------|---------|
-| `blender_connect` | Establish persistent socket connection |
-| `blender_disconnect` | Close connection |
-| `blender_request` | Call any bridge method (the workhorse) |
-| `blender_events_get` | Read buffered push events |
-| `blender_events_wait` | Wait for push events |
-| `pagecran_ping` | Health check |
+| `blender_request` | Primary workflow tool. Call any bundle-defined Blender method using `method` + `params`. |
+| `blender_connect` | Low-level debug helper to open the socket manually. Usually unnecessary because `blender_request` auto-connects. |
+| `blender_disconnect` | Low-level debug helper to close the socket manually. |
+| `blender_events_get` | Advanced helper for reading buffered bridge events. |
+| `blender_events_wait` | Advanced helper for waiting on bridge events. |
+| `pagecran_ping` | Low-level bridge health check. |
 
 ## Skills (loaded on-demand)
 
 | Skill | Triggers |
 |-------|----------|
-| `pagecran-blender-scene` | "Blender scene", "create an object", "move the camera" |
+| `pagecran-blender-scene` | "Blender scene", "create an object", "move the camera", "delete an object", "list objects", "inspect the scene" |
 | `pagecran-blender-geometry-nodes` | "Geometry Nodes", "node tree", "scatter on surface" |
 | `pagecran-blender-shader-editor` | "shader editor", "material nodes", "assign a material", "vrscene", "vray material" |
 | `pagecran-blender-asset-browser` | "asset browser", "asset library", "mark as asset" |
-| `pagecran-blender-blenderkit` | "BlenderKit", "find a BlenderKit asset" |
-| `pagecran-blender-sketchfab` | "Sketchfab", "import from Sketchfab" |
-| `pagecran-blender-bradley-presets` | "Bradley preset", "mograph style node group" |
 | `pagecran-blender-animation` | "animate this", "turntable", "keyframe" |
 | `pagecran-blender-shot-manager` | "Shot Manager", "shot list", "batch render" |
 
@@ -74,7 +71,10 @@ The backend is the `opencode_blender_bridge` extension:
 
 - No sidebar panel needed.
 - Enable or reload **OpenCode Blender Bridge** in Blender.
-- Socket port is configured in the extension preferences.
+- Default bridge endpoint: `127.0.0.1:9876`.
+- Socket port is configurable in the extension preferences.
+- Do not assume `8765`; this bundle intentionally uses its own default to avoid conflicts with other Blender bridge tooling.
+- Canonical deployed path in the workgroup repo: `R:\Workgroup_Blender\Extension\System\opencode_blender_bridge`
 
 ## Request logging
 
@@ -97,6 +97,15 @@ python "$env:USERPROFILE\.config\opencode\bin\pagecran_blender_cli.py" send exec
 ```
 
 Bundle-defined scene, shader, asset, and workflow methods are exposed through `blender_request` inside OpenCode, not as direct bridge commands.
+
+Normal method call shape:
+
+```text
+blender_request(method: "get_scene_info")
+blender_request(method: "delete_object", params: { name: "Cube" })
+```
+
+Do not pass method arguments at the top level of the tool call.
 
 ## VRScene Material Conversion
 

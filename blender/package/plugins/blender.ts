@@ -475,7 +475,8 @@ export const BlenderPlugin: Plugin = async () => {
     tool: {
       blender_connect: tool({
         description:
-          "Establish or reuse the persistent Blender socket connection for the current session.",
+          "Low-level debug tool: establish or reuse the persistent Blender socket connection for the current session. " +
+          "Normal Blender workflows should usually call blender_request directly.",
         args: {
           host: tool.schema.string().optional(),
           port: tool.schema.number().int().optional()
@@ -496,7 +497,7 @@ export const BlenderPlugin: Plugin = async () => {
 
       blender_disconnect: tool({
         description:
-          "Close and forget the persistent Blender socket connection for the current session.",
+          "Low-level debug tool: close and forget the persistent Blender socket connection for the current session.",
         args: {
           host: tool.schema.string().optional(),
           port: tool.schema.number().int().optional()
@@ -516,8 +517,10 @@ export const BlenderPlugin: Plugin = async () => {
 
       blender_request: tool({
         description:
-          "Send a command to the Blender bundle runtime. " +
+          "Primary Blender workflow tool. Send a command to the Blender bundle runtime. " +
           "Bundle-defined methods are dispatched through the OpenCode Blender Bridge. " +
+          "Put method arguments inside the params object. " +
+          "The tool auto-connects to the default bridge endpoint, so explicit blender_connect is usually unnecessary. " +
           "If no skill is loaded, call with method 'get_capabilities' to discover available methods. " +
           "Screenshots and images are automatically saved to temp files.",
         args: {
@@ -551,7 +554,7 @@ export const BlenderPlugin: Plugin = async () => {
 
       blender_events_get: tool({
         description:
-          "Read buffered Blender events for the current session. " +
+          "Advanced debug tool: read buffered Blender events for the current session. " +
           "Returns an empty list until the addon starts emitting events.",
         args: {
           clear: tool.schema.boolean().optional(),
@@ -587,7 +590,7 @@ export const BlenderPlugin: Plugin = async () => {
 
       blender_events_wait: tool({
         description:
-          "Wait for one or more Blender push events on the current persistent session. " +
+          "Advanced debug tool: wait for one or more Blender push events on the current persistent session. " +
           "Useful after actions that update the scene asynchronously.",
         args: {
           timeout_ms: tool.schema.number().int().positive().optional(),
@@ -646,7 +649,7 @@ export const BlenderPlugin: Plugin = async () => {
 
       pagecran_ping: tool({
         description:
-          "Ping Blender over the persistent socket connection and report the active endpoint.",
+          "Low-level debug tool: ping Blender over the persistent socket connection and report the active endpoint.",
         args: {
           host: tool.schema.string().optional(),
           port: tool.schema.number().int().optional(),

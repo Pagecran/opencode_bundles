@@ -6,7 +6,7 @@ Principe:
 
 - les bundles OpenCode restent dans `blender/`, `teams/`, `unreal/`
 - les bridges ou addons host-side vivent directement au premier niveau dans `bridges/`
-- pour l instant, un simple copier des dossiers suffit; les scripts de deploiement viendront si le besoin se confirme
+- un script de synchro manuelle vers les repos cibles existe: `scripts/sync_bridges.ps1`
 
 Objectif:
 
@@ -30,5 +30,7 @@ bridges/
 Notes:
 
 - `teams/` n a pas de bridge host-side et n apparait donc pas ici.
-- A ce stade, il n y a pas besoin d ajouter des scripts de deploiement tant que le copier manuel reste exceptionnel.
-- Si les copies deviennent recurrentes ou fragiles, un script de deploiement pourra etre ajoute plus tard.
+- Les bridges restent separes du cycle de deploiement des bundles OpenCode utilisateur.
+- Blender se copie vers `R:\Workgroup_Blender\Extension\System\opencode_blender_bridge`.
+- Unreal se copie vers le repo engine-side local, typiquement `D:\EpicGames\UnrealEngine\Engine\Plugins\Developer\opencode_unreal_bridge` ou `D:\UnrealEngine\Engine\Plugins\Developer\opencode_unreal_bridge` selon la workstation.
+- La synchro reste volontairement manuelle pour l instant, via `scripts/sync_bridges.ps1`.

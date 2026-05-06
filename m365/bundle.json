@@ -2,5 +2,40 @@
   "name": "m365",
   "displayName": "Microsoft 365",
   "version": "0.1.0",
-  "publishDirName": "m365"
+  "publishDirName": "m365",
+  "deployment": {
+    "plugin_file": "m365.ts",
+    "bundle_dir": "bundles\\m365",
+    "hash_marker": ".pagecran-m365-bundle.hash",
+    "bin_files": [
+      "bin\\pagecran_m365_cli.mjs"
+    ],
+    "skill_dirs": [
+      "skills\\pagecran-m365-auth",
+      "skills\\pagecran-m365-files",
+      "skills\\pagecran-m365-sites",
+      "skills\\pagecran-m365-excel",
+      "skills\\pagecran-m365-openwork",
+      "skills\\pagecran-m365-outlook",
+      "skills\\pagecran-m365-teams-chat",
+      "skills\\pagecran-m365-teams-channels"
+    ],
+    "auth_files": [
+      "pagecran_m365_auth.json",
+      "pagecran_m365_auth_pending.json"
+    ],
+    "legacy_cleanup": {
+      "files": [
+        "plugins\\teams.ts",
+        "bin\\pagecran_teams_cli.mjs",
+        ".pagecran-teams-bundle.hash",
+        "pagecran_teams_auth.json"
+      ],
+      "dirs": [
+        "skills\\pagecran-teams-auth",
+        "skills\\pagecran-teams-channels",
+        "skills\\pagecran-teams-chat"
+      ]
+    }
+  }
 }

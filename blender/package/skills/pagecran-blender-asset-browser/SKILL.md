@@ -25,6 +25,12 @@ All methods below are called via the `blender_request` tool:
 blender_request(method: "<method_name>", params: { ... })
 ```
 
+Bridge endpoint rule:
+
+- Use the bridge defaults unless the user explicitly overrides host or port.
+- Default OpenCode Blender Bridge endpoint: `127.0.0.1:9876`.
+- Do **not** assume `8765`.
+
 ## Workflow
 
 1. **Discover** libraries with `list_asset_libraries`.

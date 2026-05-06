@@ -35,6 +35,9 @@ Last reviewed: 2026-04-22.
   - `-Bundle all` excludes deprecated bundles such as `teams`; build them explicitly if needed.
 - Build and publish a bundle to the default NAS target:
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle blender`
+- Sync host-side bridges manually into their target repos:
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\sync_bridges.ps1 -Bridge all -CheckOnly`
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\sync_bridges.ps1 -Bridge blender`
 - The build script stages `dist/<bundle>/<version>` and excludes `.git`, `.codenomad`, `dist`, `package\node_modules`, and Python `__pycache__`.
 - Verify vendored runtime copies are in sync:
   - `powershell -ExecutionPolicy Bypass -File .\scripts\sync_runtime.ps1 -CheckOnly`

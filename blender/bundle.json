@@ -2,5 +2,30 @@
   "name": "blender",
   "displayName": "Blender",
   "version": "1.0.0",
-  "publishDirName": "blender"
+  "publishDirName": "blender",
+  "deployment": {
+    "plugin_file": "blender.ts",
+    "bundle_dir": "bundles\\blender",
+    "hash_marker": ".pagecran-blender-bundle.hash",
+    "bin_files": [
+      "bin\\pagecran_blender_cli.py"
+    ],
+    "skill_dirs": [
+      "skills\\pagecran-blender-scene",
+      "skills\\pagecran-blender-geometry-nodes",
+      "skills\\pagecran-blender-shader-editor",
+      "skills\\pagecran-blender-asset-browser",
+      "skills\\pagecran-blender-animation",
+      "skills\\pagecran-blender-shot-manager"
+    ],
+    "auth_files": [],
+    "legacy_cleanup": {
+      "files": [],
+      "dirs": [
+        "skills\\pagecran-blender-blenderkit",
+        "skills\\pagecran-blender-sketchfab",
+        "skills\\pagecran-blender-bradley-presets"
+      ]
+    }
+  }
 }

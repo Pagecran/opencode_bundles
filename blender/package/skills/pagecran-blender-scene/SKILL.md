@@ -7,6 +7,10 @@ description: |
   - "Blender scene"
   - "create an object"
   - "move the camera"
+  - "delete an object"
+  - "remove an object"
+  - "list objects"
+  - "inspect the scene"
 ---
 
 ## How to call methods
@@ -17,6 +21,31 @@ All methods below are called via the `blender_request` tool:
 blender_request(method: "<method_name>", params: { ... })
 ```
 
+Normal usage rule:
+
+- For normal Blender tasks, use `blender_request` directly.
+- Put method arguments inside `params`, not at the top level of the tool call.
+- `blender_request` auto-connects to the bridge; `blender_connect` is low-level troubleshooting only.
+
+Examples:
+
+```text
+blender_request(method: "get_scene_info")
+blender_request(method: "delete_object", params: { name: "Cube" })
+```
+
+Incorrect:
+
+```text
+blender_request(method: "delete_object", name: "Cube")
+```
+
+Bridge endpoint rule:
+
+- Use the bridge defaults unless the user explicitly overrides host or port.
+- Default OpenCode Blender Bridge endpoint: `127.0.0.1:9876`.
+- Do **not** assume `8765`.
+
 If the bridge is unreachable, tell the user to enable or reload **OpenCode Blender Bridge** in Blender and verify the port in extension preferences.
 
 ## Workflow
@@ -25,6 +54,7 @@ If the bridge is unreachable, tell the user to enable or reload **OpenCode Blend
 2. Make the **smallest targeted change**.
 3. **Verify** with a readback or screenshot.
 4. Report object names and transforms in the response.
+5. Use `get_capabilities` only when the existing skill catalog is insufficient.
 
 ---
 
@@ -32,13 +62,13 @@ If the bridge is unreachable, tell the user to enable or reload **OpenCode Blend
 
 ### `ping`
 
-Health check. Returns bridge version and Blender info.
+Health check. Returns bridge version and Blender info. Debug-oriented; not the normal first step for scene edits.
 
 **Params:** none
 
 ### `get_capabilities`
 
-Returns every bundle-defined Blender method plus the currently reachable bridge capabilities. Use this to discover methods not listed here.
+Returns every bundle-defined Blender method plus the currently reachable bridge capabilities. Use this only when the existing skill catalog is insufficient.
 
 **Params:** none
 
