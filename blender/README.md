@@ -30,7 +30,8 @@ The plugin exposes one primary workflow tool, `blender_request`, plus a few low-
 | `package/runtime/*` | Bundle-side runtime: dispatcher, registry, validation |
 | `package/methods/*` | Bundle-side method source of truth |
 | `package/scripts/blender/*` | Bundle-side Blender workflow scripts executed through `execute_code` |
-| `package/skills/*/SKILL.md` | 9 domain skills with method catalogs and guardrails |
+| `package/data/blender_docs/*` | Vendored Blender API and manual docs used by local documentation methods |
+| `package/skills/*/SKILL.md` | Domain skills with method catalogs and guardrails |
 | `package/bin/pagecran_blender_cli.py` | Standalone Python CLI for manual/scripted bridge access |
 | `install.ps1` | Installer that deploys the bundle into the global OpenCode config |
 
@@ -55,6 +56,7 @@ The plugin exposes one primary workflow tool, `blender_request`, plus a few low-
 | `pagecran-blender-asset-browser` | "asset browser", "asset library", "mark as asset" |
 | `pagecran-blender-animation` | "animate this", "turntable", "keyframe" |
 | `pagecran-blender-shot-manager` | "Shot Manager", "shot list", "batch render" |
+| `pagecran-blender-docs` | "Blender API", "bpy docs", "Blender manual" |
 
 Each skill contains a **method catalog** (method names, parameter tables, types) and **domain knowledge** (Blender conventions, common patterns).
 
@@ -106,6 +108,27 @@ blender_request(method: "delete_object", params: { name: "Cube" })
 ```
 
 Do not pass method arguments at the top level of the tool call.
+
+## Vendored Blender Documentation
+
+The bundle includes a complete vendored copy of the Blender MCP documentation dataset from Blender Lab:
+
+- `package/data/blender_docs/api/` - Blender Python API reference
+- `package/data/blender_docs/manual/` - Blender user manual
+- `package/data/blender_docs/SOURCE.json` - source URL, ref and resolved commit
+
+Maintenance command:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\update_blender_docs.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\update_blender_docs.ps1 -CheckOnly
+```
+
+Documentation methods are local bundle methods and do not require Blender to be open:
+
+- `search_blender_api_docs`
+- `search_blender_manual`
+- `get_blender_api_docs`
 
 ## VRScene Material Conversion
 

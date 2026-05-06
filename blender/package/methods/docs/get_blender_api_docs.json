@@ -1,0 +1,32 @@
+{
+  "name": "get_blender_api_docs",
+  "domain": "docs",
+  "description": "Read a vendored Blender Python API reference page by identifier.",
+  "kind": "hostless",
+  "risk": "read",
+  "args": {
+    "identifier": {
+      "type": "string",
+      "required": true,
+      "description": "API identifier such as bpy.types.Object or bpy.ops.object."
+    },
+    "max_chars": {
+      "type": "integer",
+      "description": "Maximum number of characters to return from the doc page."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Documentation page content with truncation metadata."
+  },
+  "requires": {
+    "localData": ["blender_docs"]
+  },
+  "execution": {
+    "strategy": "local_handler",
+    "handler": "docs.get_api"
+  },
+  "verify": {
+    "strategy": "none"
+  }
+}

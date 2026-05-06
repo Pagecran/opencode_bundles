@@ -1,0 +1,16 @@
+{
+    "source":  "https://projects.blender.org/lab/blender_mcp.git",
+    "ref":  "main",
+    "commit":  "98b0e49d98321d321c7e631389200f513f765d59",
+    "updated_at":  "2026-05-06T19:11:12.1673336Z",
+    "paths":  [
+                  {
+                      "source":  "mcp/blmcp/data/api",
+                      "target":  "api"
+                  },
+                  {
+                      "source":  "mcp/blmcp/data/manual",
+                      "target":  "manual"
+                  }
+              ]
+}

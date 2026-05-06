@@ -1,0 +1,36 @@
+{
+  "name": "search_blender_manual",
+  "domain": "docs",
+  "description": "Search the vendored Blender user manual.",
+  "kind": "hostless",
+  "risk": "read",
+  "args": {
+    "query": {
+      "type": "string",
+      "required": true,
+      "description": "Text to search for in the Blender manual."
+    },
+    "max_results": {
+      "type": "integer",
+      "description": "Maximum number of matches to return."
+    },
+    "context_lines": {
+      "type": "integer",
+      "description": "Number of surrounding lines to include per match."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Search results with relative doc paths, line numbers, and snippets."
+  },
+  "requires": {
+    "localData": ["blender_docs"]
+  },
+  "execution": {
+    "strategy": "local_handler",
+    "handler": "docs.search_manual"
+  },
+  "verify": {
+    "strategy": "none"
+  }
+}

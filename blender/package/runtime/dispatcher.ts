@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url"
 import { createHostDispatcher, type BridgeProfile } from "../_runtime/host_dispatcher"
 import type { DispatchOptions } from "../_runtime/types"
 
+import { dispatchLocalBlenderMethod, isLocalBlenderMethod } from "./local_handlers"
 import { getBlenderMethodRegistry } from "./method_registry"
 
 const RESULT_MARKER = "__OPENCODE_BLENDER_RESULT__"
@@ -35,5 +36,12 @@ const blenderProfile: BridgeProfile = {
 const dispatch = createHostDispatcher(getBlenderMethodRegistry(), blenderProfile)
 
 export async function dispatchBlenderMethod(options: DispatchOptions) {
+  if (options.method !== "get_capabilities" && options.method !== "list_commands") {
+    const definition = getBlenderMethodRegistry().get(options.method)
+    if (definition && isLocalBlenderMethod(definition)) {
+      return dispatchLocalBlenderMethod(definition, options)
+    }
+  }
+
   return dispatch(options)
 }
