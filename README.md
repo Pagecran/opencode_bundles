@@ -1,6 +1,6 @@
-# Pagecran OpenCode Bundles
+# OpenCode Bundles
 
-Monorepo source des bundles OpenCode Pagecran.
+Monorepo source des bundles OpenCode.
 
 ## Structure
 
