@@ -276,9 +276,6 @@ async function listChatMembers(chatId: string, forceRefresh = false) {
   const result = await graphResult({
     path: `/chats/${encodePathSegment(chatId)}/members`,
     method: "GET",
-    query: {
-      "$top": 50
-    },
     force_refresh: forceRefresh
   })
 
@@ -331,15 +328,24 @@ async function listChatSummaries(limit: number, forceRefresh = false) {
     path: "/me/chats",
     method: "GET",
     query: {
-      "$top": clampPositiveInt(limit, DEFAULT_CHAT_LIST_LIMIT),
-      "$orderby": "lastUpdatedDateTime desc"
+      "$top": clampPositiveInt(limit, DEFAULT_CHAT_LIST_LIMIT)
     },
     force_refresh: forceRefresh
   })
 
-  return Promise.all(
+  const chats = await Promise.all(
     getCollectionItems(result).map((chat) => getChatSummaryFromRaw(chat, me, forceRefresh))
   )
+  return chats.sort((left, right) =>
+    String(right.lastUpdatedDateTime || "").localeCompare(String(left.lastUpdatedDateTime || ""))
+  )
+}
+
+function scoreChatReference(chat: ChatSummary, chatName: string | null, participantName: string | null) {
+  const chatScore = scoreBestValue([chat.label, chat.topic], chatName || undefined)
+  const participantScore = scoreBestValue(chat.memberLabels, participantName || undefined)
+  const oneOnOneBonus = participantName && participantScore >= 1000 && chat.chatType === "oneOnOne" ? 100 : 0
+  return chatScore + participantScore + oneOnOneBonus
 }
 
 async function resolveChatReference(args: Record<string, unknown>) {
@@ -362,9 +368,7 @@ async function resolveChatReference(args: Record<string, unknown>) {
   )
   const match = chooseSingleMatch(
     chats,
-    (chat) =>
-      scoreBestValue([chat.label, chat.topic], chatName || undefined) +
-      scoreBestValue(chat.memberLabels, participantName || undefined),
+    (chat) => scoreChatReference(chat, chatName, participantName),
     (chat) => `${chat.label} [${chat.id}]`,
     "chat"
   )
@@ -630,11 +634,14 @@ export async function listChats(args: { limit?: number, query?: string, force_re
     clampPositiveInt(args.limit, DEFAULT_CHAT_LIST_LIMIT),
     Boolean(args.force_refresh)
   )
-  const filtered = filterAndSortMatches(chats, getString(args.query) || undefined, (chat) => [
-    chat.label,
-    chat.topic,
-    ...chat.memberLabels
-  ])
+  const query = getString(args.query)
+  const filtered = query
+    ? chats
+      .map((chat) => ({ chat, score: scoreChatReference(chat, query, query) }))
+      .filter((entry) => entry.score > 0)
+      .sort((left, right) => right.score - left.score || left.chat.label.localeCompare(right.chat.label))
+      .map((entry) => entry.chat)
+    : chats
 
   return {
     count: filtered.length,

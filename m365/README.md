@@ -82,7 +82,7 @@ It talks directly to Microsoft Graph with delegated OAuth device-code authentica
 
 Environment variables:
 
-- shared default app: `TeamsPascale`
+- shared default app: `Pagecran MS 365`
 - default client id: `674f3d17-5a27-417b-bcff-bfea2e61447b`
 - default tenant id: `2fa485e4-1eee-4081-8445-98037b332c71`
 - `PAGECRAN_M365_CLIENT_ID` - optional override, Microsoft Entra app client id

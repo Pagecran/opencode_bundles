@@ -3,7 +3,7 @@ import { homedir } from "node:os"
 import { dirname, join } from "node:path"
 
 const GRAPH_BASE_URL = "https://graph.microsoft.com/v1.0"
-const DEFAULT_APP_NAME = "TeamsPascale"
+const DEFAULT_APP_NAME = "Pagecran MS 365"
 const DEFAULT_CLIENT_ID = "674f3d17-5a27-417b-bcff-bfea2e61447b"
 const DEFAULT_TENANT_ID =
   process.env.PAGECRAN_M365_TENANT_ID ||

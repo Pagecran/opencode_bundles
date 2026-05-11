@@ -20,7 +20,7 @@ description: |
 
 ## Environment
 
-- Shared default Entra app: `TeamsPascale`.
+- Shared default Entra app: `Pagecran MS 365`.
 - Default client id: `674f3d17-5a27-417b-bcff-bfea2e61447b`.
 - Default tenant id: `2fa485e4-1eee-4081-8445-98037b332c71`.
 - `PAGECRAN_M365_CLIENT_ID` / `PAGECRAN_M365_TENANT_ID` remain optional overrides.
@@ -61,6 +61,6 @@ Clear stored tokens and pending login state.
 
 - Never ask the user for a password in chat.
 - Prefer device-code login over ad hoc credential handling.
-- Prefer the shared default TeamsPascale app unless the user explicitly asks to override it.
+- Prefer the shared default Pagecran MS 365 app unless the user explicitly asks to override it.
 - If auth fails because of scopes or tenant policy, report the exact Graph/OAuth error.
 - Once auth succeeds, use `m365_graph_request` or future high-level tools instead of ad hoc HTTP examples.

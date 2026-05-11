@@ -4,7 +4,7 @@ import { dirname, join } from "node:path"
 
 import { uniqueNonEmpty } from "./validators"
 
-export const DEFAULT_APP_NAME = "TeamsPascale"
+export const DEFAULT_APP_NAME = "Pagecran MS 365"
 export const DEFAULT_CLIENT_ID = "674f3d17-5a27-417b-bcff-bfea2e61447b"
 export const DEFAULT_TENANT_ID = "2fa485e4-1eee-4081-8445-98037b332c71"
 const DEFAULT_SCOPES = [
