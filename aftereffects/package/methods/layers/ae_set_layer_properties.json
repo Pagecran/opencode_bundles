@@ -1,0 +1,25 @@
+{
+  "name": "ae_set_layer_properties",
+  "domain": "layers",
+  "description": "Set common transform and timing properties on a layer.",
+  "kind": "host-backed",
+  "risk": "write",
+  "args": {
+    "composition_name": { "type": "string", "required": true },
+    "layer_name": { "type": "string", "required": false },
+    "layer_index": { "type": "integer", "required": false },
+    "position": { "type": "array", "required": false, "items": { "type": "number" } },
+    "scale": { "type": "array", "required": false, "items": { "type": "number" } },
+    "rotation": { "type": "number", "required": false },
+    "opacity": { "type": "number", "required": false },
+    "start_time": { "type": "number", "required": false },
+    "in_point": { "type": "number", "required": false },
+    "out_point": { "type": "number", "required": false },
+    "enabled": { "type": "boolean", "required": false },
+    "timeout_ms": { "type": "integer", "required": false }
+  },
+  "returns": { "type": "object" },
+  "requires": { "bridgeMethods": ["pagecran-ae-bridge.jsx"] },
+  "execution": { "strategy": "file_bridge", "handler": "layers.set_properties" },
+  "verify": { "strategy": "none" }
+}

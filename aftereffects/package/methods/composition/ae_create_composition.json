@@ -1,0 +1,20 @@
+{
+  "name": "ae_create_composition",
+  "domain": "composition",
+  "description": "Create a composition in the active After Effects project.",
+  "kind": "host-backed",
+  "risk": "write",
+  "args": {
+    "name": { "type": "string", "required": true },
+    "width": { "type": "integer", "required": false },
+    "height": { "type": "integer", "required": false },
+    "pixel_aspect": { "type": "number", "required": false },
+    "duration": { "type": "number", "required": false },
+    "frame_rate": { "type": "number", "required": false },
+    "timeout_ms": { "type": "integer", "required": false }
+  },
+  "returns": { "type": "object" },
+  "requires": { "bridgeMethods": ["pagecran-ae-bridge.jsx"] },
+  "execution": { "strategy": "file_bridge", "handler": "composition.create" },
+  "verify": { "strategy": "followup_method", "method": "ae_list_compositions" }
+}

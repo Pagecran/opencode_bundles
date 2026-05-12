@@ -1,0 +1,22 @@
+{
+  "name": "aftereffects",
+  "displayName": "After Effects",
+  "version": "0.1.0",
+  "publishDirName": "aftereffects",
+  "deployment": {
+    "plugin_file": "aftereffects.ts",
+    "bundle_dir": "bundles\\aftereffects",
+    "hash_marker": ".pagecran-aftereffects-bundle.hash",
+    "bin_files": [
+      "bin\\pagecran_aftereffects_cli.mjs"
+    ],
+    "skill_dirs": [
+      "skills\\pagecran-aftereffects-project"
+    ],
+    "auth_files": [],
+    "legacy_cleanup": {
+      "files": [],
+      "dirs": []
+    }
+  }
+}

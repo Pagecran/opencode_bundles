@@ -1,0 +1,19 @@
+{
+  "name": "ae_add_text_layer",
+  "domain": "layers",
+  "description": "Add a text layer to an After Effects composition.",
+  "kind": "host-backed",
+  "risk": "write",
+  "args": {
+    "composition_name": { "type": "string", "required": true },
+    "text": { "type": "string", "required": true },
+    "layer_name": { "type": "string", "required": false },
+    "position": { "type": "array", "required": false, "items": { "type": "number" } },
+    "font_size": { "type": "number", "required": false },
+    "timeout_ms": { "type": "integer", "required": false }
+  },
+  "returns": { "type": "object" },
+  "requires": { "bridgeMethods": ["pagecran-ae-bridge.jsx"] },
+  "execution": { "strategy": "file_bridge", "handler": "layers.add_text" },
+  "verify": { "strategy": "followup_method", "method": "ae_list_compositions" }
+}

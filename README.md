@@ -4,9 +4,9 @@ Monorepo source des bundles OpenCode.
 
 ## Structure
 
+- `aftereffects/` : bundle Adobe After Effects via bridge ScriptUI/ExtendScript
 - `blender/` : bundle Blender actuel, autonome et publiable tel quel
 - `m365/` : bundle Microsoft 365 / Graph, axe SharePoint, fichiers, Excel et Teams via Graph
-- `teams/` : bundle Teams / Microsoft Graph deprecie, remplace par `m365/`
 - `unreal/` : bundle Unreal
 - `bridges/` : sources canoniques des bridges host-side, directement au premier niveau
 - `packages/bundle-runtime/` : runtime TypeScript partage, synchronise dans les bundles
@@ -45,14 +45,14 @@ Set-ExecutionPolicy -Scope Process Bypass
 # build + publication du bundle Blender
 .\scripts\build_bundle.ps1 -Bundle blender
 
+# build + publication du bundle After Effects
+.\scripts\build_bundle.ps1 -Bundle aftereffects
+
 # build local uniquement
 .\scripts\build_bundle.ps1 -Bundle blender -SkipPublish
 
 # tous les bundles non deprecies du monorepo
 .\scripts\build_bundle.ps1 -Bundle all
-
-# bundle Teams deprecie, build explicite seulement
-.\scripts\build_bundle.ps1 -Bundle teams -SkipPublish
 
 # verifier que les copies vendored du runtime partage sont a jour
 .\scripts\sync_runtime.ps1 -CheckOnly
@@ -83,9 +83,9 @@ Les bridges host-side ne passent pas par le NAS bundle. Ils restent dans leurs r
 
 ## Ajouter un nouveau bundle
 
-1. Creer un nouveau dossier a la racine, par ex. `m365/`
+1. Creer un nouveau dossier a la racine, par ex. `aftereffects/`
 2. Ajouter son `bundle.json`
 3. Ajouter son `install.ps1` et son `package/`
-4. Lancer `.\scripts\build_bundle.ps1 -Bundle m365`
+4. Lancer `.\scripts\build_bundle.ps1 -Bundle aftereffects`
 
 Voir `ARCHITECTURE.md` et `BUNDLE_AUTHORING.md` pour les conventions completes.

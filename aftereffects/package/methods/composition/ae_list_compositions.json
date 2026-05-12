@@ -1,0 +1,14 @@
+{
+  "name": "ae_list_compositions",
+  "domain": "composition",
+  "description": "List compositions in the active After Effects project.",
+  "kind": "host-backed",
+  "risk": "read",
+  "args": {
+    "timeout_ms": { "type": "integer", "required": false }
+  },
+  "returns": { "type": "object" },
+  "requires": { "bridgeMethods": ["pagecran-ae-bridge.jsx"] },
+  "execution": { "strategy": "file_bridge", "handler": "composition.list" },
+  "verify": { "strategy": "none" }
+}

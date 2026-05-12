@@ -22,7 +22,7 @@ Deux profils sont supportes.
 
 `host-backed`:
 
-- exemples: `blender`, `unreal`
+- exemples: `aftereffects`, `blender`, `unreal`
 - une application locale execute une partie du travail
 - le plugin OpenCode expose peu d outils generiques, par exemple connect/request/events/ping
 - les methodes metier sont decrites dans `package/methods/**/*.json`
@@ -90,7 +90,7 @@ The shared runtime provides:
 - output serialization helpers
 
 Bundle-specific runtimes may add dispatch before or around the shared dispatcher for strategies
-that are intentionally local to one bundle, such as `local_handler` or `host_cli`. Promote a
+that are intentionally local to one bundle, such as `local_handler`, `host_cli` or `file_bridge`. Promote a
 strategy to `packages/bundle-runtime/src` only when at least two active bundles need the same
 behavior.
 
@@ -108,13 +108,16 @@ Manifest execution strategies describe where the work runs:
 - `host_function`: import a host-side Python function and execute it through the live host bridge
 - `local_handler`: run an in-process TypeScript handler in the bundle runtime
 - `host_cli`: run a local external binary without requiring a live bridge
+- `file_bridge`: exchange command/result files with a live host-side panel or script
 - `direct_api`: call a remote API directly from the bundle runtime
 - `compose`: compose other methods or API calls
 
 These strategies are optional and bundle-specific. Use live bridge strategies only when the method
 needs the current editor/application session. Use `local_handler` for packaged reference data,
 local indexes, schemas and static catalogs. Use `host_cli` for offline file-oriented inspection
-that needs an installed host application but not an open editor session.
+that needs an installed host application but not an open editor session. Use `file_bridge` when a
+host application must stay open but the bridge transport is a filesystem command queue instead of
+a socket or direct subprocess call.
 
 Method requirements should make dependencies explicit:
 
@@ -166,6 +169,7 @@ Those belong in manifests plus bundle-side scripts.
 Active bundles built by `-Bundle all`:
 
 - `blender`
+- `aftereffects`
 - `m365`
 - `unreal`
 
@@ -215,7 +219,7 @@ Bundle coherence checks should validate more than method names:
 - skill references point to real public methods
 - `verify.method` references existing methods
 - scripts referenced by `host_script` exist under `package/scripts/`
-- handlers referenced by `local_handler`, `host_cli`, `direct_api` or `compose` exist in the bundle runtime
+- handlers referenced by `local_handler`, `host_cli`, `file_bridge`, `direct_api` or `compose` exist in the bundle runtime
 - datasets referenced by `requires.localData` exist under `package/data/` and include provenance when external
 - external binaries and environment variables required by manifests are documented in the bundle README
 

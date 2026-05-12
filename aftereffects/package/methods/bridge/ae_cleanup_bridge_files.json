@@ -1,0 +1,13 @@
+{
+  "name": "ae_cleanup_bridge_files",
+  "domain": "bridge",
+  "description": "Remove old local After Effects bridge command and result files.",
+  "kind": "hostless",
+  "risk": "write",
+  "args": {
+    "max_age_ms": { "type": "integer", "required": false, "description": "Maximum age to keep, in milliseconds. Defaults to 24 hours." }
+  },
+  "returns": { "type": "object" },
+  "execution": { "strategy": "local_handler", "tool": "ae_cleanup_bridge_files" },
+  "verify": { "strategy": "followup_method", "method": "ae_bridge_status" }
+}

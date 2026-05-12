@@ -7,7 +7,7 @@ Last reviewed: 2026-04-22.
 ## Repo Overview
 
 - This is a small monorepo for Pagecran OpenCode bundles.
-- Primary bundle roots are `blender/`, `m365/`, and `unreal/`.
+- Primary bundle roots are `aftereffects/`, `blender/`, `m365/`, and `unreal/`.
 - Architecture guidance lives in `ARCHITECTURE.md`; authoring guidance lives in `BUNDLE_AUTHORING.md`.
 - Canonical host-side bridge sources should live directly under `bridges/` at the repo root.
 - Shared runtime source lives in `packages/bundle-runtime/src` and is vendored into each active bundle under `package/_runtime`.
@@ -26,6 +26,7 @@ Last reviewed: 2026-04-22.
 ## Build Commands
 
 - Build one bundle locally without publishing:
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle aftereffects -SkipPublish`
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle blender -SkipPublish`
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle m365 -SkipPublish`
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle unreal -SkipPublish`
@@ -43,6 +44,8 @@ Last reviewed: 2026-04-22.
 
 ## Install Commands
 
+- Install the After Effects bundle into the user's OpenCode config:
+  - `powershell -ExecutionPolicy Bypass -File .\aftereffects\install.ps1`
 - Install the Blender bundle into the user's OpenCode config:
   - `powershell -ExecutionPolicy Bypass -File .\blender\install.ps1`
 - Install the Microsoft 365 bundle into the user's OpenCode config:
@@ -63,6 +66,7 @@ Last reviewed: 2026-04-22.
 - Run from the relevant bundle `package/` directory:
   - `bunx tsc --noEmit -p tsconfig.json`
 - Equivalent root-relative form:
+  - `bunx tsc --noEmit -p .\aftereffects\package\tsconfig.json`
   - `bunx tsc --noEmit -p .\blender\package\tsconfig.json`
   - `bunx tsc --noEmit -p .\m365\package\tsconfig.json`
   - `bunx tsc --noEmit -p .\unreal\package\tsconfig.json`
@@ -75,6 +79,8 @@ Last reviewed: 2026-04-22.
   - root-relative: `bun --cwd .\blender\package run check:bundle`
 - Unreal bundle coherence check:
   - root-relative: `bun --cwd .\unreal\package run check:bundle`
+- After Effects bundle coherence check:
+  - root-relative: `bun --cwd .\aftereffects\package run check:bundle`
 - The checked-in TS configs include the bundle runtime for bundles that have started the manifest-driven migration.
 - If you change CLI JS/MJS or Python files, do a manual smoke test because TS will not cover them.
 
@@ -87,6 +93,8 @@ Last reviewed: 2026-04-22.
 
 ## Smoke Test Commands
 
+- After Effects CLI endpoint check:
+  - `node .\aftereffects\package\bin\pagecran_aftereffects_cli.mjs endpoint --pretty`
 - Blender CLI endpoint check:
   - `python .\blender\package\bin\pagecran_blender_cli.py endpoint --pretty`
 - Blender bridge ping:

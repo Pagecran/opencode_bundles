@@ -113,6 +113,7 @@ Host-backed bundles use:
 - `host_function`: import a Python function from `package/scripts/`; currently used by Blender
 - `local_handler`: run an in-process TypeScript handler without contacting the host bridge
 - `host_cli`: run a local host binary for offline file-oriented work
+- `file_bridge`: exchange command/result files with a live host-side panel or script
 
 Hostless bundles use:
 
@@ -122,7 +123,8 @@ Hostless bundles use:
 These strategies are optional. Use `local_handler` for methods that only need packaged data,
 local files, schemas or indexes. Use `host_cli` for methods that need an installed host
 application but do not require a live bridge session. Do not add a bridge dependency for methods
-that can be answered locally.
+that can be answered locally. Use `file_bridge` for hosts like After Effects where a ScriptUI panel
+polls a filesystem command queue while the application remains open.
 
 Common `requires` keys:
 
@@ -207,6 +209,9 @@ Rules:
 For `local_handler` and `host_cli` methods in a host-backed bundle, keep the manifest under
 `package/methods/` but implement the handler in the bundle runtime. These methods should still
 be documented in skills and covered by coherence checks.
+
+For `file_bridge` methods, document the bridge folder, panel/script installation path and timeout
+behavior in the bundle README.
 
 Blender example checks:
 
@@ -305,6 +310,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check_all.ps1
 - Auth, scopes, bridge methods, local data, external binaries and env requirements are explicit.
 - External `package/data/` datasets include `SOURCE.json` and an update script.
 - `host_cli` methods document their binary resolution and timeout behavior.
+- `file_bridge` methods document their bridge folder, host-side panel/script and timeout behavior.
 - Runtime `_runtime/` copies are in sync with `packages/bundle-runtime/src`.
 - `node_modules` and `dist` output are not committed.
 - Build output still excludes deprecated bundles from `-Bundle all`.

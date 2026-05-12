@@ -1,0 +1,14 @@
+{
+  "name": "ae_ping",
+  "domain": "bridge",
+  "description": "Ping the live After Effects bridge panel.",
+  "kind": "host-backed",
+  "risk": "read",
+  "args": {
+    "timeout_ms": { "type": "integer", "required": false, "description": "Bridge response timeout in milliseconds." }
+  },
+  "returns": { "type": "object" },
+  "requires": { "bridgeMethods": ["pagecran-ae-bridge.jsx"], "env": ["PAGECRAN_AFTEREFFECTS_BRIDGE_DIR"] },
+  "execution": { "strategy": "file_bridge", "handler": "bridge.ping" },
+  "verify": { "strategy": "none" }
+}

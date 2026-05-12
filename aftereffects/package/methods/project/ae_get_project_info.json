@@ -1,0 +1,14 @@
+{
+  "name": "ae_get_project_info",
+  "domain": "project",
+  "description": "Read summary information about the active After Effects project.",
+  "kind": "host-backed",
+  "risk": "read",
+  "args": {
+    "timeout_ms": { "type": "integer", "required": false }
+  },
+  "returns": { "type": "object" },
+  "requires": { "bridgeMethods": ["pagecran-ae-bridge.jsx"] },
+  "execution": { "strategy": "file_bridge", "handler": "project.get_info" },
+  "verify": { "strategy": "none" }
+}

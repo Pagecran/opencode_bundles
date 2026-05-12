@@ -1,0 +1,11 @@
+{
+  "name": "ae_bridge_status",
+  "domain": "bridge",
+  "description": "Inspect the local After Effects bridge folder and last bridge status.",
+  "kind": "hostless",
+  "risk": "read",
+  "args": {},
+  "returns": { "type": "object" },
+  "execution": { "strategy": "local_handler", "tool": "ae_bridge_status" },
+  "verify": { "strategy": "none" }
+}

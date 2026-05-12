@@ -1,0 +1,15 @@
+{
+  "name": "ae_execute_script",
+  "domain": "scripting",
+  "description": "Execute a small ExtendScript snippet in After Effects through the bridge. Use only for trusted workflows.",
+  "kind": "host-backed",
+  "risk": "write",
+  "args": {
+    "script": { "type": "string", "required": true },
+    "timeout_ms": { "type": "integer", "required": false }
+  },
+  "returns": { "type": "object" },
+  "requires": { "bridgeMethods": ["pagecran-ae-bridge.jsx"] },
+  "execution": { "strategy": "file_bridge", "handler": "scripting.execute" },
+  "verify": { "strategy": "none" }
+}
