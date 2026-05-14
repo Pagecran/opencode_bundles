@@ -1,0 +1,33 @@
+{
+  "name": "resolve_ping",
+  "domain": "system",
+  "description": "Connect to Resolve or Fusion and report the active host identity.",
+  "kind": "host-backed",
+  "risk": "read",
+  "args": {
+    "host": {
+      "type": "string",
+      "required": false,
+      "default": "auto",
+      "description": "Target host: auto, resolve, or fusion."
+    },
+    "timeout_seconds": {
+      "type": "number",
+      "required": false,
+      "default": 30,
+      "description": "Maximum time to wait for the host helper."
+    }
+  },
+  "requires": {
+    "externalBinary": "python",
+    "env": [
+      "PAGECRAN_RESOLVE_PYTHON",
+      "PAGECRAN_RESOLVE_SCRIPT_LIB",
+      "PAGECRAN_FUSION_SCRIPT_LIB"
+    ]
+  },
+  "execution": {
+    "strategy": "host_cli",
+    "handler": "host.ping"
+  }
+}

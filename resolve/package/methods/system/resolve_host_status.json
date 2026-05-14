@@ -1,0 +1,27 @@
+{
+  "name": "resolve_host_status",
+  "domain": "system",
+  "description": "Inspect local Resolve/Fusion runtime compatibility and Python candidates.",
+  "kind": "host-backed",
+  "risk": "read",
+  "args": {
+    "timeout_seconds": {
+      "type": "number",
+      "required": false,
+      "default": 30,
+      "description": "Maximum time to spend probing Python runtimes and host libraries."
+    }
+  },
+  "requires": {
+    "externalBinary": "python",
+    "env": [
+      "PAGECRAN_RESOLVE_PYTHON",
+      "PAGECRAN_RESOLVE_SCRIPT_LIB",
+      "PAGECRAN_FUSION_SCRIPT_LIB"
+    ]
+  },
+  "execution": {
+    "strategy": "local_handler",
+    "handler": "host.status"
+  }
+}

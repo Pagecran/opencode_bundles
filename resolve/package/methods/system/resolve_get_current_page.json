@@ -1,0 +1,32 @@
+{
+  "name": "resolve_get_current_page",
+  "domain": "system",
+  "description": "Return the current DaVinci Resolve page.",
+  "kind": "host-backed",
+  "risk": "read",
+  "args": {
+    "host": {
+      "type": "string",
+      "required": false,
+      "default": "resolve",
+      "description": "Target host. This method requires resolve."
+    },
+    "timeout_seconds": {
+      "type": "number",
+      "required": false,
+      "default": 30,
+      "description": "Maximum time to wait for the host helper."
+    }
+  },
+  "requires": {
+    "externalBinary": "python",
+    "env": [
+      "PAGECRAN_RESOLVE_PYTHON",
+      "PAGECRAN_RESOLVE_SCRIPT_LIB"
+    ]
+  },
+  "execution": {
+    "strategy": "host_cli",
+    "handler": "resolve.get_current_page"
+  }
+}

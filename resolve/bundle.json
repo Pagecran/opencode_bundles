@@ -1,0 +1,22 @@
+{
+  "name": "resolve",
+  "displayName": "DaVinci Resolve / Fusion",
+  "version": "0.1.0",
+  "publishDirName": "resolve",
+  "deployment": {
+    "plugin_file": "resolve.ts",
+    "bundle_dir": "bundles\\resolve",
+    "hash_marker": ".pagecran-resolve-bundle.hash",
+    "bin_files": [
+      "bin\\pagecran_resolve_cli.py"
+    ],
+    "skill_dirs": [
+      "skills\\pagecran-resolve-fusion"
+    ],
+    "auth_files": [],
+    "legacy_cleanup": {
+      "files": [],
+      "dirs": []
+    }
+  }
+}
