@@ -7,6 +7,7 @@ Monorepo source des bundles OpenCode.
 - `aftereffects/` : bundle Adobe After Effects via bridge ScriptUI/ExtendScript
 - `blender/` : bundle Blender actuel, autonome et publiable tel quel
 - `m365/` : bundle Microsoft 365 / Graph, axe SharePoint, fichiers, Excel et Teams via Graph
+- `resolve/` : bundle DaVinci Resolve Studio / Fusion Studio via scripting API Blackmagic
 - `unreal/` : bundle Unreal
 - `bridges/` : sources canoniques des bridges host-side, directement au premier niveau
 - `packages/bundle-runtime/` : runtime TypeScript partage, synchronise dans les bundles
@@ -47,6 +48,9 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 # build + publication du bundle After Effects
 .\scripts\build_bundle.ps1 -Bundle aftereffects
+
+# build + publication du bundle Resolve / Fusion
+.\scripts\build_bundle.ps1 -Bundle resolve
 
 # build local uniquement
 .\scripts\build_bundle.ps1 -Bundle blender -SkipPublish

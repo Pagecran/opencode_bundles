@@ -22,7 +22,7 @@ Deux profils sont supportes.
 
 `host-backed`:
 
-- exemples: `aftereffects`, `blender`, `unreal`
+- exemples: `aftereffects`, `blender`, `resolve`, `unreal`
 - une application locale execute une partie du travail
 - le plugin OpenCode expose peu d outils generiques, par exemple connect/request/events/ping
 - les methodes metier sont decrites dans `package/methods/**/*.json`
@@ -171,6 +171,7 @@ Active bundles built by `-Bundle all`:
 - `blender`
 - `aftereffects`
 - `m365`
+- `resolve`
 - `unreal`
 
 ## Build Flow

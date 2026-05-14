@@ -1,5 +1,5 @@
 param(
-    [string[]]$Bundles = @("aftereffects", "blender", "unreal", "m365"),
+    [string[]]$Bundles = @("aftereffects", "blender", "m365", "resolve", "unreal"),
     [switch]$CheckOnly
 )
 

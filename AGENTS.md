@@ -7,7 +7,7 @@ Last reviewed: 2026-04-22.
 ## Repo Overview
 
 - This is a small monorepo for Pagecran OpenCode bundles.
-- Primary bundle roots are `aftereffects/`, `blender/`, `m365/`, and `unreal/`.
+- Primary bundle roots are `aftereffects/`, `blender/`, `m365/`, `resolve/`, and `unreal/`.
 - Architecture guidance lives in `ARCHITECTURE.md`; authoring guidance lives in `BUNDLE_AUTHORING.md`.
 - Canonical host-side bridge sources should live directly under `bridges/` at the repo root.
 - Shared runtime source lives in `packages/bundle-runtime/src` and is vendored into each active bundle under `package/_runtime`.
@@ -29,6 +29,7 @@ Last reviewed: 2026-04-22.
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle aftereffects -SkipPublish`
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle blender -SkipPublish`
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle m365 -SkipPublish`
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle resolve -SkipPublish`
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle unreal -SkipPublish`
 - Build all bundles locally without publishing:
   - `powershell -ExecutionPolicy Bypass -File .\scripts\build_bundle.ps1 -Bundle all -SkipPublish`
@@ -50,6 +51,8 @@ Last reviewed: 2026-04-22.
   - `powershell -ExecutionPolicy Bypass -File .\blender\install.ps1`
 - Install the Microsoft 365 bundle into the user's OpenCode config:
   - `powershell -ExecutionPolicy Bypass -File .\m365\install.ps1`
+- Install the Resolve / Fusion bundle into the user's OpenCode config:
+  - `powershell -ExecutionPolicy Bypass -File .\resolve\install.ps1`
 - Install the Unreal bundle into the user's OpenCode config:
   - `powershell -ExecutionPolicy Bypass -File .\unreal\install.ps1`
 - Append `-SkipBunInstall` if you want the installer to skip dependency installation.
@@ -69,6 +72,7 @@ Last reviewed: 2026-04-22.
   - `bunx tsc --noEmit -p .\aftereffects\package\tsconfig.json`
   - `bunx tsc --noEmit -p .\blender\package\tsconfig.json`
   - `bunx tsc --noEmit -p .\m365\package\tsconfig.json`
+  - `bunx tsc --noEmit -p .\resolve\package\tsconfig.json`
   - `bunx tsc --noEmit -p .\unreal\package\tsconfig.json`
 - Microsoft 365 bundle coherence check:
   - from `m365\package\`: `bun run check:bundle`
@@ -81,6 +85,8 @@ Last reviewed: 2026-04-22.
   - root-relative: `bun --cwd .\unreal\package run check:bundle`
 - After Effects bundle coherence check:
   - root-relative: `bun --cwd .\aftereffects\package run check:bundle`
+- Resolve bundle coherence check:
+  - root-relative: `bun --cwd .\resolve\package run check:bundle`
 - The checked-in TS configs include the bundle runtime for bundles that have started the manifest-driven migration.
 - If you change CLI JS/MJS or Python files, do a manual smoke test because TS will not cover them.
 
@@ -97,6 +103,8 @@ Last reviewed: 2026-04-22.
   - `node .\aftereffects\package\bin\pagecran_aftereffects_cli.mjs endpoint --pretty`
 - Blender CLI endpoint check:
   - `python .\blender\package\bin\pagecran_blender_cli.py endpoint --pretty`
+- Resolve CLI status check:
+  - `python .\resolve\package\bin\pagecran_resolve_cli.py status --pretty`
 - Blender bridge ping:
   - `python .\blender\package\bin\pagecran_blender_cli.py ping --pretty`
 - Microsoft 365 CLI auth status:

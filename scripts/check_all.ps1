@@ -55,6 +55,7 @@ Invoke-BunScript -WorkingDirectory (Join-Path $RepoRoot "packages\bundle-runtime
 Invoke-BunScript -WorkingDirectory (Join-Path $RepoRoot "aftereffects\package") -Arguments @("run", "check") -Label "Check After Effects bundle"
 Invoke-BunScript -WorkingDirectory (Join-Path $RepoRoot "blender\package") -Arguments @("run", "check") -Label "Check Blender bundle"
 Invoke-BunScript -WorkingDirectory (Join-Path $RepoRoot "m365\package") -Arguments @("run", "check") -Label "Check M365 bundle"
+Invoke-BunScript -WorkingDirectory (Join-Path $RepoRoot "resolve\package") -Arguments @("run", "check") -Label "Check Resolve bundle"
 Invoke-BunScript -WorkingDirectory (Join-Path $RepoRoot "unreal\package") -Arguments @("run", "check") -Label "Check Unreal bundle"
 
 if ($IncludeDeprecated) {
