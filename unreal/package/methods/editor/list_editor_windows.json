@@ -1,0 +1,36 @@
+{
+  "name": "list_editor_windows",
+  "domain": "editor",
+  "description": "List visible Unreal editor windows in the current process so a specific editor can be targeted.",
+  "kind": "host-backed",
+  "risk": "read",
+  "args": {
+    "window_title_contains": {
+      "type": "string",
+      "required": false,
+      "description": "Optional substring filter applied to editor window titles."
+    },
+    "include_hidden": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "description": "Include hidden windows in the listing."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Visible editor windows with hwnd, title, class name, active state, and bounds."
+  },
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/editor/list_editor_windows.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  },
+  "verify": {
+    "strategy": "none"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "get_editor_window_screenshot",
+  "domain": "editor",
+  "description": "Capture the active Unreal editor window or a specific editor window matched by title.",
+  "kind": "host-backed",
+  "risk": "read",
+  "args": {
+    "max_size": {
+      "type": "integer",
+      "required": false,
+      "default": 1280,
+      "description": "Optional max output dimension in pixels."
+    },
+    "window_title_contains": {
+      "type": "string",
+      "required": false,
+      "description": "Optional substring used to select a specific editor window title."
+    },
+    "include_hidden": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "description": "Allow targeting hidden windows when selecting by title."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "Window screenshot payload plus capture metadata."
+  },
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/editor/get_editor_window_screenshot.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  },
+  "verify": {
+    "strategy": "none"
+  }
+}

@@ -63,6 +63,14 @@ Read project name, map, engine version, active world, plugins, and render pipeli
 
 Read current level, selected actors, PIE state, active viewport, and camera information.
 
+### `list_editor_windows`
+
+List visible Unreal editor windows so a specific editor can be targeted by title.
+
+### `get_editor_window_screenshot`
+
+Capture the active Unreal editor window, or a specific editor window matched by title.
+
 ## Named bundle methods
 
 ### `load_level`
@@ -171,5 +179,6 @@ Capture the active viewport. Prefer this for quick verification after scene chan
 - Inspect before mutating, unless the user explicitly asks for a direct action.
 - Prefer exact object, sequence, or asset paths when several matches are possible.
 - After changing the scene, verify with a readback or screenshot.
+- Use `list_editor_windows` first when the user wants a screenshot of Sequencer, Material Editor, Content Browser, or another non-viewport editor.
 - Prefer named bundle methods over `execute_python` unless you are deliberately prototyping a new workflow.
 - Treat `get_capabilities` as the source of truth for what the bundle currently exposes in this session.

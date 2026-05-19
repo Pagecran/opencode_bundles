@@ -1,7 +1,9 @@
 # pyright: reportAttributeAccessIssue=false, reportUnknownMemberType=false, reportUnknownArgumentType=false, reportUnknownVariableType=false, reportGeneralTypeIssues=false
 
 import base64
+import ctypes
 import os
+import struct
 import tempfile
 import time
 
@@ -11,6 +13,48 @@ import unreal  # type: ignore
 DEFAULT_VIEWPORT_SCREENSHOT_SIZE = 1280
 MAX_VIEWPORT_SCREENSHOT_SIZE = 4096
 VIEWPORT_SCREENSHOT_TIMEOUT_SECONDS = 10.0
+WINDOW_CAPTURE_TIMEOUT_SECONDS = 1.0
+
+if os.name == "nt":
+    user32 = ctypes.windll.user32
+    gdi32 = ctypes.windll.gdi32
+
+    SRCCOPY = 0x00CC0020
+    PW_RENDERFULLCONTENT = 0x00000002
+    DIB_RGB_COLORS = 0
+    BI_RGB = 0
+    HALFTONE = 4
+
+    class RECT(ctypes.Structure):
+        _fields_ = [
+            ("left", ctypes.c_long),
+            ("top", ctypes.c_long),
+            ("right", ctypes.c_long),
+            ("bottom", ctypes.c_long),
+        ]
+
+
+    class BITMAPINFOHEADER(ctypes.Structure):
+        _fields_ = [
+            ("biSize", ctypes.c_uint32),
+            ("biWidth", ctypes.c_long),
+            ("biHeight", ctypes.c_long),
+            ("biPlanes", ctypes.c_ushort),
+            ("biBitCount", ctypes.c_ushort),
+            ("biCompression", ctypes.c_uint32),
+            ("biSizeImage", ctypes.c_uint32),
+            ("biXPelsPerMeter", ctypes.c_long),
+            ("biYPelsPerMeter", ctypes.c_long),
+            ("biClrUsed", ctypes.c_uint32),
+            ("biClrImportant", ctypes.c_uint32),
+        ]
+
+
+    class BITMAPINFO(ctypes.Structure):
+        _fields_ = [
+            ("bmiHeader", BITMAPINFOHEADER),
+            ("bmiColors", ctypes.c_uint32 * 3),
+        ]
 
 
 def _normalize_path(value: str) -> str:
@@ -235,5 +279,235 @@ def viewport_screenshot_result(max_size=None):
         "width": width,
         "height": height,
         "byte_length": len(image_bytes),
+        "image_base64": base64.b64encode(image_bytes).decode("ascii"),
+    }
+
+
+def ensure_windows_capture_available():
+    if os.name != "nt":
+        raise RuntimeError("Editor window screenshots are currently implemented only on Windows workstations")
+
+
+def get_window_text(hwnd):
+    length = user32.GetWindowTextLengthW(hwnd)
+    if length <= 0:
+        return ""
+    buffer = ctypes.create_unicode_buffer(length + 1)
+    user32.GetWindowTextW(hwnd, buffer, len(buffer))
+    return buffer.value
+
+
+def get_window_class_name(hwnd):
+    buffer = ctypes.create_unicode_buffer(256)
+    if user32.GetClassNameW(hwnd, buffer, len(buffer)) == 0:
+        return ""
+    return buffer.value
+
+
+def get_window_rect(hwnd):
+    rect = RECT()
+    if not user32.GetWindowRect(hwnd, ctypes.byref(rect)):
+        raise RuntimeError(f"Could not read window bounds for hwnd={int(hwnd)}")
+    return rect
+
+
+def get_current_process_id():
+    return int(os.getpid())
+
+
+def enumerate_editor_windows(include_hidden=False):
+    ensure_windows_capture_available()
+
+    current_pid = get_current_process_id()
+    foreground = user32.GetForegroundWindow()
+    windows = []
+
+    @ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_void_p, ctypes.c_void_p)
+    def enum_proc(hwnd, _lparam):
+        process_id = ctypes.c_ulong()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(process_id))
+        if int(process_id.value) != current_pid:
+            return True
+
+        is_visible = bool(user32.IsWindowVisible(hwnd))
+        title = get_window_text(hwnd)
+        if (not include_hidden and not is_visible) or not title.strip():
+            return True
+
+        rect = get_window_rect(hwnd)
+        width = rect.right - rect.left
+        height = rect.bottom - rect.top
+        if width <= 0 or height <= 0:
+            return True
+
+        windows.append({
+            "hwnd": int(hwnd),
+            "title": title,
+            "class_name": get_window_class_name(hwnd),
+            "is_visible": is_visible,
+            "is_foreground": int(hwnd) == int(foreground),
+            "width": width,
+            "height": height,
+            "left": rect.left,
+            "top": rect.top,
+            "right": rect.right,
+            "bottom": rect.bottom,
+        })
+        return True
+
+    user32.EnumWindows(enum_proc, 0)
+    windows.sort(key=lambda item: (not item["is_foreground"], item["title"].lower()))
+    return windows
+
+
+def filter_editor_windows(windows, window_title_contains=None):
+    if not window_title_contains:
+        return windows
+
+    needle = str(window_title_contains).strip().lower()
+    if not needle:
+        return windows
+
+    filtered = [window for window in windows if needle in window["title"].lower()]
+    return filtered
+
+
+def list_editor_windows_result(window_title_contains=None, include_hidden=False):
+    windows = filter_editor_windows(
+        enumerate_editor_windows(include_hidden=bool(include_hidden)),
+        window_title_contains=window_title_contains,
+    )
+    return {
+        "ok": True,
+        "count": len(windows),
+        "windows": windows,
+    }
+
+
+def choose_editor_window(window_title_contains=None, include_hidden=False):
+    windows = filter_editor_windows(
+        enumerate_editor_windows(include_hidden=bool(include_hidden)),
+        window_title_contains=window_title_contains,
+    )
+    if not windows:
+        if window_title_contains:
+            raise RuntimeError(f"No Unreal editor window matched '{window_title_contains}'")
+        raise RuntimeError("No visible Unreal editor window was found for the current process")
+    return windows[0]
+
+
+def compute_scaled_dimensions(width: int, height: int, max_size):
+    requested = resolve_viewport_screenshot_size(max_size)
+    longest = max(width, height)
+    if longest <= requested:
+        return width, height, requested
+
+    scale = float(requested) / float(longest)
+    return max(1, int(round(width * scale))), max(1, int(round(height * scale))), requested
+
+
+def bitmap_to_bmp_bytes(hdc_mem, hbitmap, width: int, height: int):
+    bmi = BITMAPINFO()
+    bmi.bmiHeader.biSize = ctypes.sizeof(BITMAPINFOHEADER)
+    bmi.bmiHeader.biWidth = width
+    bmi.bmiHeader.biHeight = -height
+    bmi.bmiHeader.biPlanes = 1
+    bmi.bmiHeader.biBitCount = 32
+    bmi.bmiHeader.biCompression = BI_RGB
+    pixel_bytes = width * height * 4
+    buffer = (ctypes.c_ubyte * pixel_bytes)()
+
+    rows = gdi32.GetDIBits(
+        hdc_mem,
+        hbitmap,
+        0,
+        height,
+        ctypes.byref(buffer),
+        ctypes.byref(bmi),
+        DIB_RGB_COLORS,
+    )
+    if rows == 0:
+        raise RuntimeError("GetDIBits failed while reading the editor window capture")
+
+    file_header = struct.pack("<2sIHHI", b"BM", 14 + 40 + pixel_bytes, 0, 0, 14 + 40)
+    info_header = struct.pack(
+        "<IIIHHIIIIII",
+        40,
+        width,
+        height,
+        1,
+        32,
+        BI_RGB,
+        pixel_bytes,
+        0,
+        0,
+        0,
+        0,
+    )
+    return file_header + info_header + bytes(buffer)
+
+
+def capture_editor_window(hwnd: int, target_width: int, target_height: int):
+    ensure_windows_capture_available()
+
+    rect = get_window_rect(hwnd)
+    source_width = rect.right - rect.left
+    source_height = rect.bottom - rect.top
+    if source_width <= 0 or source_height <= 0:
+        raise RuntimeError(f"Editor window hwnd={hwnd} has invalid bounds")
+
+    hdc_window = user32.GetWindowDC(hwnd)
+    if not hdc_window:
+        raise RuntimeError(f"GetWindowDC failed for hwnd={hwnd}")
+
+    hdc_mem = gdi32.CreateCompatibleDC(hdc_window)
+    if not hdc_mem:
+        user32.ReleaseDC(hwnd, hdc_window)
+        raise RuntimeError(f"CreateCompatibleDC failed for hwnd={hwnd}")
+
+    hbitmap = gdi32.CreateCompatibleBitmap(hdc_window, target_width, target_height)
+    if not hbitmap:
+        gdi32.DeleteDC(hdc_mem)
+        user32.ReleaseDC(hwnd, hdc_window)
+        raise RuntimeError(f"CreateCompatibleBitmap failed for hwnd={hwnd}")
+
+    previous_object = gdi32.SelectObject(hdc_mem, hbitmap)
+    capture_method = None
+    try:
+        if target_width != source_width or target_height != source_height:
+            gdi32.SetStretchBltMode(hdc_mem, HALFTONE)
+
+        printed = bool(user32.PrintWindow(hwnd, hdc_mem, PW_RENDERFULLCONTENT))
+        if printed:
+            capture_method = "user32.PrintWindow"
+        else:
+            copied = bool(gdi32.StretchBlt(hdc_mem, 0, 0, target_width, target_height, hdc_window, 0, 0, source_width, source_height, SRCCOPY))
+            if not copied:
+                raise RuntimeError(f"Both PrintWindow and StretchBlt failed for hwnd={hwnd}")
+            capture_method = "gdi32.StretchBlt"
+
+        image_bytes = bitmap_to_bmp_bytes(hdc_mem, hbitmap, target_width, target_height)
+        return image_bytes, capture_method
+    finally:
+        gdi32.SelectObject(hdc_mem, previous_object)
+        gdi32.DeleteObject(hbitmap)
+        gdi32.DeleteDC(hdc_mem)
+        user32.ReleaseDC(hwnd, hdc_window)
+
+
+def editor_window_screenshot_result(max_size=None, window_title_contains=None, include_hidden=False):
+    target = choose_editor_window(window_title_contains=window_title_contains, include_hidden=include_hidden)
+    target_width, target_height, requested_size = compute_scaled_dimensions(target["width"], target["height"], max_size)
+    image_bytes, capture_method = capture_editor_window(target["hwnd"], target_width, target_height)
+
+    return {
+        "ok": True,
+        "capture_method": capture_method,
+        "requested_max_size": requested_size,
+        "format": "bmp",
+        "width": target_width,
+        "height": target_height,
+        "byte_length": len(image_bytes),
+        "window": target,
         "image_base64": base64.b64encode(image_bytes).decode("ascii"),
     }

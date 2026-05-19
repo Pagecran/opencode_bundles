@@ -101,11 +101,15 @@ Interpretation:
 
 - `execute_python`
 - `load_level`
+- `list_editor_windows`
+- `get_editor_window_screenshot`
 - `get_viewport_screenshot`
 
 Current implemented subset:
 
 - `load_level`
+- `list_editor_windows`
+- `get_editor_window_screenshot` captures the active editor window or a title-matched editor window at the OS window level
 - `get_viewport_screenshot` is implemented as a bundle host script on top of `execute_python`, not as a dedicated bridge primitive
 
 ### Sequencer
