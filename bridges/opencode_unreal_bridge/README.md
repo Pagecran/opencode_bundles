@@ -38,6 +38,11 @@ Implemented bridge primitives:
 
 Bundle-defined methods are expected to run on top of `execute_python` from the OpenCode bundle runtime.
 
+Current examples include:
+
+- `load_level`
+- `get_viewport_screenshot`
+
 In other words:
 
 - bridge source of truth: `bridges/opencode_unreal_bridge/`

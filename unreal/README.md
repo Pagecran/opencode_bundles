@@ -111,6 +111,7 @@ Bridge primitives today:
 Bundle-defined methods currently migrated on top of `execute_python`:
 
 - `load_level`
+- `get_viewport_screenshot`
 - `list_level_sequences`
 - `get_sequence_info`
 - `open_level_sequence`

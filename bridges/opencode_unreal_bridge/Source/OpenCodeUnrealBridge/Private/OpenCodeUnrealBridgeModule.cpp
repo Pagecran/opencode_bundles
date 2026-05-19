@@ -108,12 +108,6 @@ void FOpenCodeUnrealBridgeModule::RegisterMethods()
     };
     RegisterPlannedMethod(Method);
 
-    Method = MakeMethod(TEXT("get_viewport_screenshot"), TEXT("Capture the active editor viewport for verification."), TEXT("editor"));
-    Method.Params = {
-        MakeParam(TEXT("max_size"), TEXT("int"), false, TEXT("Optional max output dimension in pixels."))
-    };
-    RegisterPlannedMethod(Method);
-
     Method = MakeMethod(TEXT("list_level_sequences"), TEXT("List Level Sequence assets available to the project."), TEXT("sequencer"));
     Method.Params = {
         MakeParam(TEXT("root_path"), TEXT("string"), false, TEXT("Optional Unreal content root, default /Game.")),

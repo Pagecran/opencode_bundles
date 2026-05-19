@@ -103,6 +103,11 @@ Interpretation:
 - `load_level`
 - `get_viewport_screenshot`
 
+Current implemented subset:
+
+- `load_level`
+- `get_viewport_screenshot` is implemented as a bundle host script on top of `execute_python`, not as a dedicated bridge primitive
+
 ### Sequencer
 
 - `list_level_sequences`

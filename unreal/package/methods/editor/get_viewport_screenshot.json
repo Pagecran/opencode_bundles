@@ -1,0 +1,31 @@
+{
+  "name": "get_viewport_screenshot",
+  "domain": "editor",
+  "description": "Capture the active Unreal editor viewport for verification.",
+  "kind": "host-backed",
+  "risk": "read",
+  "args": {
+    "max_size": {
+      "type": "integer",
+      "required": false,
+      "default": 1280,
+      "description": "Optional max output dimension in pixels."
+    }
+  },
+  "returns": {
+    "type": "object",
+    "description": "PNG screenshot payload plus capture metadata."
+  },
+  "execution": {
+    "strategy": "host_script",
+    "script": "unreal/editor/get_viewport_screenshot.py"
+  },
+  "requires": {
+    "bridgeMethods": [
+      "execute_python"
+    ]
+  },
+  "verify": {
+    "strategy": "none"
+  }
+}
