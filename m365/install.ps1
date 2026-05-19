@@ -208,6 +208,7 @@ Install-DirectoryTree -RelativeSource "skills\pagecran-m365-auth" -RelativeTarge
 Install-DirectoryTree -RelativeSource "skills\pagecran-m365-files" -RelativeTarget "skills\pagecran-m365-files"
 Install-DirectoryTree -RelativeSource "skills\pagecran-m365-sites" -RelativeTarget "skills\pagecran-m365-sites"
 Install-DirectoryTree -RelativeSource "skills\pagecran-m365-excel" -RelativeTarget "skills\pagecran-m365-excel"
+Install-DirectoryTree -RelativeSource "skills\pagecran-m365-powerpoint" -RelativeTarget "skills\pagecran-m365-powerpoint"
 Install-DirectoryTree -RelativeSource "skills\pagecran-m365-openwork" -RelativeTarget "skills\pagecran-m365-openwork"
 Install-DirectoryTree -RelativeSource "skills\pagecran-m365-outlook" -RelativeTarget "skills\pagecran-m365-outlook"
 Install-DirectoryTree -RelativeSource "skills\pagecran-m365-teams-chat" -RelativeTarget "skills\pagecran-m365-teams-chat"
@@ -229,7 +230,23 @@ if (-not $SkipBunInstall) {
         }
     }
     else {
-        Write-Warning "bun was not found. Skipping dependency installation."
+        $npm = Get-Command npm -ErrorAction SilentlyContinue
+        if ($null -ne $npm) {
+            Push-Location $ConfigRoot
+            try {
+                & $npm.Source install
+                if ($LASTEXITCODE -ne 0) {
+                    throw "npm install failed with exit code $LASTEXITCODE"
+                }
+                Write-Host "Ran npm install in $ConfigRoot"
+            }
+            finally {
+                Pop-Location
+            }
+        }
+        else {
+            Write-Warning "Neither bun nor npm was found. Skipping dependency installation."
+        }
     }
 }
 

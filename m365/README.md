@@ -7,7 +7,7 @@ Microsoft 365 / Graph bundle for the Pagecran OpenCode bundles monorepo.
 - `package/plugins/m365.ts` - OpenCode plugin for Microsoft 365 / Microsoft Graph
 - `package/runtime/*` - reusable auth, Graph, dispatcher and validation helpers
 - `package/methods/*` - method manifests used as the public tool source of truth
-- `package/skills/pagecran-m365-*` - on-demand skills for auth, files, sites, Excel, Teams, Outlook and OpenWork workflows
+- `package/skills/pagecran-m365-*` - on-demand skills for auth, files, sites, Excel, PowerPoint, Teams, Outlook and OpenWork workflows
 - `package/bin/pagecran_m365_cli.mjs` - manual CLI for auth and Graph requests
 - `install.ps1` - installer for the global OpenCode config
 
@@ -47,6 +47,11 @@ High-level:
 - `m365_excel_list_worksheets`
 - `m365_excel_read_range`
 - `m365_excel_write_range`
+- `m365_powerpoint_inspect_media`
+- `m365_powerpoint_inspect_media_batch`
+- `m365_powerpoint_inspect_structure`
+- `m365_powerpoint_inspect_text`
+- `m365_powerpoint_replace_text`
 - `m365_teams_list_chats`
 - `m365_teams_read_chat_messages`
 - `m365_teams_create_chat`
@@ -152,6 +157,7 @@ node .\package\bin\pagecran_m365_cli.mjs request GET /sites?search=Marketing
 3. Confirm auth with `m365_auth_device_poll`
 4. Test connectivity with `m365_ping`
 5. Use the high-level files, sites and Excel tools when possible
+6. Use the PowerPoint tools for text inspection and token replacement inside `.pptx` / `.potx` files
 6. Use `m365_search_workspace`, `m365_batch_drive_items`, and `m365_notify` for prompt-first OpenWork workflows
 7. Fall back to `m365_graph_request` for uncovered Graph workflows
 
@@ -178,11 +184,26 @@ m365_delete_drive_item(site_name: "Marketing", library_name: "Documents", item_p
 m365_batch_drive_items(site_name: "Marketing", library_name: "Documents", actions: [{ action: "rename", item_path: "Campaigns/2026/notes.txt", new_name: "notes-final.txt" }])
 m365_excel_list_worksheets(site_name: "Finance", library_name: "Documents", item_path: "Forecast.xlsx")
 m365_excel_read_range(site_name: "Finance", library_name: "Documents", item_path: "Forecast.xlsx", worksheet_name: "Q1", range_address: "A1:C10")
+m365_powerpoint_inspect_media(site_name: "Marketing", library_name: "Documents", item_path: "Decks/Launch-template.potx")
+m365_powerpoint_inspect_media_batch(site_name: "Marketing", library_name: "Documents", items: [{ item_path: "Decks/Launch-template.potx" }, { item_path: "Decks/Sales-deck.pptx" }])
+m365_powerpoint_inspect_structure(site_name: "Marketing", library_name: "Documents", item_path: "Decks/Launch-template.potx")
+m365_powerpoint_inspect_text(site_name: "Marketing", library_name: "Documents", item_path: "Decks/Launch-template.potx")
+m365_powerpoint_replace_text(site_name: "Marketing", library_name: "Documents", item_path: "Decks/Launch-template.potx", replacements: { "{{CLIENT_NAME}}": "Contoso", "{{DATE}}": "May 2026" }, preview_only: true)
 m365_teams_list_chats(query: "alex")
 m365_teams_send_chat_message(participant_username: "alex@contoso.com", message: "Bonjour")
 m365_teams_list_channels(team_name: "Marketing")
 m365_teams_send_channel_message(team_name: "Marketing", channel_name: "General", message: "Daily sync posted")
 ```
+
+## PowerPoint notes
+
+- The new PowerPoint helpers work on `.pptx`, `.potx`, `.pptm`, `.potm`, `.ppsx`, and `.ppsm` files stored in SharePoint or OneDrive.
+- `m365_powerpoint_inspect_text` reads text-bearing slide parts for inspection.
+- `m365_powerpoint_inspect_media` lists embedded media under `ppt/media/` plus linked external media references discovered through PowerPoint relationships.
+- `m365_powerpoint_inspect_media_batch` runs the same media inspection across several PowerPoint files in one call.
+- `m365_powerpoint_inspect_structure` reports slides, layouts, masters, placeholders, core properties, and presentation size.
+- `m365_powerpoint_replace_text` can replace text in slides and, optionally, in slide layouts and masters for template-style updates.
+- The replacement logic currently works at the PowerPoint text-run level. Tokens split across multiple runs by PowerPoint formatting may need template cleanup first.
 
 ## Next layer
 

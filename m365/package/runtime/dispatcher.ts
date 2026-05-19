@@ -21,6 +21,13 @@ import {
   updateDriveItem,
   uploadSmallDriveItem
 } from "./m365"
+import {
+  inspectMultiplePowerPointMedia,
+  inspectPowerPointMedia,
+  inspectPowerPointStructure,
+  inspectPowerPointText,
+  replacePowerPointText
+} from "./powerpoint"
 import { getMethodManifest, listMethodManifests } from "./method_registry"
 import type { MethodManifest } from "../_runtime/types"
 import { validateAndNormalizeArgs } from "../_runtime/manifest_args"
@@ -274,6 +281,21 @@ const METHOD_HANDLERS: Record<string, MethodHandler> = {
   },
   async m365_excel_write_range(args) {
     return writeWorkbookRange(args as Parameters<typeof writeWorkbookRange>[0])
+  },
+  async m365_powerpoint_inspect_text(args) {
+    return inspectPowerPointText(args as Parameters<typeof inspectPowerPointText>[0])
+  },
+  async m365_powerpoint_inspect_media(args) {
+    return inspectPowerPointMedia(args as Parameters<typeof inspectPowerPointMedia>[0])
+  },
+  async m365_powerpoint_inspect_media_batch(args) {
+    return inspectMultiplePowerPointMedia(args as Parameters<typeof inspectMultiplePowerPointMedia>[0])
+  },
+  async m365_powerpoint_inspect_structure(args) {
+    return inspectPowerPointStructure(args as Parameters<typeof inspectPowerPointStructure>[0])
+  },
+  async m365_powerpoint_replace_text(args) {
+    return replacePowerPointText(args as Parameters<typeof replacePowerPointText>[0])
   },
   async m365_teams_list_chats(args) {
     return listChats(args as Parameters<typeof listChats>[0])
