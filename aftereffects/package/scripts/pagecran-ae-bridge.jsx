@@ -52,11 +52,104 @@
         file.close();
     }
 
+    function quoteJsonString(value) {
+        var text = String(value);
+        var result = "\"";
+        for (var i = 0; i < text.length; i += 1) {
+            var code = text.charCodeAt(i);
+            var ch = text.charAt(i);
+            if (ch === "\"") {
+                result += "\\\"";
+            } else if (ch === "\\") {
+                result += "\\\\";
+            } else if (ch === "\b") {
+                result += "\\b";
+            } else if (ch === "\f") {
+                result += "\\f";
+            } else if (ch === "\n") {
+                result += "\\n";
+            } else if (ch === "\r") {
+                result += "\\r";
+            } else if (ch === "\t") {
+                result += "\\t";
+            } else if (code < 32) {
+                result += "\\u" + ("000" + code.toString(16)).slice(-4);
+            } else {
+                result += ch;
+            }
+        }
+        return result + "\"";
+    }
+
+    function isArray(value) {
+        return Object.prototype.toString.call(value) === "[object Array]";
+    }
+
+    function stackContains(stack, value) {
+        for (var i = 0; i < stack.length; i += 1) {
+            if (stack[i] === value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function jsonSerialize(value, stack) {
+        if (value === null) {
+            return "null";
+        }
+
+        var valueType = typeof value;
+        if (valueType === "string") {
+            return quoteJsonString(value);
+        }
+        if (valueType === "number") {
+            return isFinite(value) ? String(value) : "null";
+        }
+        if (valueType === "boolean") {
+            return value ? "true" : "false";
+        }
+        if (valueType === "undefined" || valueType === "function") {
+            return undefined;
+        }
+        if (stackContains(stack, value)) {
+            return quoteJsonString("[Circular]");
+        }
+
+        stack.push(value);
+        try {
+            if (isArray(value)) {
+                var arrayItems = [];
+                for (var i = 0; i < value.length; i += 1) {
+                    var item = jsonSerialize(value[i], stack);
+                    arrayItems.push(item === undefined ? "null" : item);
+                }
+                return "[" + arrayItems.join(",") + "]";
+            }
+
+            var objectItems = [];
+            for (var key in value) {
+                if (!Object.prototype.hasOwnProperty.call(value, key)) {
+                    continue;
+                }
+                var serialized = jsonSerialize(value[key], stack);
+                if (serialized !== undefined) {
+                    objectItems.push(quoteJsonString(key) + ":" + serialized);
+                }
+            }
+            return "{" + objectItems.join(",") + "}";
+        } catch (error) {
+            return quoteJsonString(String(value));
+        } finally {
+            stack.pop();
+        }
+    }
+
     function jsonStringify(value) {
         if (typeof JSON !== "undefined" && JSON.stringify) {
             return JSON.stringify(value, null, 2);
         }
-        return value.toString();
+        return jsonSerialize(value, []);
     }
 
     function parseJson(text) {
