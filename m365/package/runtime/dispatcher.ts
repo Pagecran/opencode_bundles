@@ -54,6 +54,7 @@ import {
   clearPendingAuth,
   DEFAULT_APP_NAME,
   ensureDeviceCodeBootstrap,
+  getAvailableScopeList,
   getClientId,
   getScopeList,
   getScopeString,
@@ -98,7 +99,7 @@ const METHOD_HANDLERS: Record<string, MethodHandler> = {
 
     try {
       const auth = await getValidAuth()
-      const currentScopes = getScopeList(auth.scope)
+      const currentScopes = getAvailableScopeList(auth)
       if (auth.clientId === clientId && auth.tenantId === tenantId) {
         const missingScopes = getMissingDeclaredScopes(
           {
@@ -170,7 +171,7 @@ const METHOD_HANDLERS: Record<string, MethodHandler> = {
           tokenFile: getAuthStatus().auth_file,
           expiresAt: auth.expiresAt,
           scope: auth.scope,
-          scopeList: getScopeList(auth.scope),
+          scopeList: getAvailableScopeList(auth),
           tenantId: auth.tenantId,
           clientId: auth.clientId,
           hasRefreshToken: Boolean(auth.refreshToken)
@@ -440,12 +441,13 @@ async function verifyMethodRequirements(manifest: MethodManifest) {
     throw new Error(buildAuthBootstrapError(manifest, bootstrap.autoStarted, bootstrap.pending))
   }
 
-  const missingScopes = getMissingDeclaredScopes(manifest, getScopeList(auth.scope))
+  const currentScopes = getAvailableScopeList(auth)
+  const missingScopes = getMissingDeclaredScopes(manifest, currentScopes)
   if (missingScopes.length > 0) {
     const bootstrap = await ensureDeviceCodeBootstrap({
       clientId: auth.clientId,
       tenantId: auth.tenantId,
-      scopes: [...getScopeList(auth.scope), ...collectBootstrapScopes(manifest)]
+      scopes: [...currentScopes, ...collectBootstrapScopes(manifest)]
     })
     throw new Error(buildAuthBootstrapError(manifest, bootstrap.autoStarted, bootstrap.pending, missingScopes))
   }

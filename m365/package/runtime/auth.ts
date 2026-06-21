@@ -198,6 +198,42 @@ export function buildScopeString(scopes: string[]) {
   return uniqueNonEmpty(scopes).join(" ")
 }
 
+function decodeJwtPayload(accessToken: string) {
+  const parts = accessToken.split(".")
+  if (parts.length < 2) {
+    return null
+  }
+
+  const payload = parts[1]
+  const normalized = payload.replace(/-/g, "+").replace(/_/g, "/")
+  const paddingLength = normalized.length % 4
+  const base64 = paddingLength === 0 ? normalized : normalized + "=".repeat(4 - paddingLength)
+
+  try {
+    const parsed = parseJson(Buffer.from(base64, "base64").toString("utf8"))
+    return isRecord(parsed) ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+function getAccessTokenScopeList(accessToken?: string | null) {
+  if (!accessToken) {
+    return [] as string[]
+  }
+
+  const payload = decodeJwtPayload(accessToken)
+  if (!payload) {
+    return [] as string[]
+  }
+
+  return getScopeList(readString(payload.scp))
+}
+
+export function getAvailableScopeList(auth?: Pick<StoredAuth, "scope" | "accessToken"> | null) {
+  return mergeScopes(getScopeList(auth?.scope), getAccessTokenScopeList(auth?.accessToken))
+}
+
 export function mergeScopes(...scopeLists: Array<string[] | null | undefined>) {
   const merged: string[] = []
   for (const scopeList of scopeLists) {
@@ -278,10 +314,18 @@ function buildStoredAuth(
   }
 
   const expiresIn = readNumber(tokenPayload.expires_in, 3600) || 3600
+  const grantedScopes = buildScopeString(
+    mergeScopes(
+      getScopeList(scope),
+      getScopeList(readString(tokenPayload.scope)),
+      getAccessTokenScopeList(accessToken)
+    )
+  )
+
   return {
     tenantId,
     clientId,
-    scope,
+    scope: grantedScopes,
     tokenType: readString(tokenPayload.token_type) || "Bearer",
     accessToken,
     refreshToken: readString(tokenPayload.refresh_token) || previousAuth?.refreshToken || null,
@@ -413,7 +457,7 @@ export async function pollForDeviceToken({
         tokenFile: AUTH_FILE_PATH,
         expiresAt: auth.expiresAt,
         scope: auth.scope,
-        scopeList: getScopeList(auth.scope),
+        scopeList: getAvailableScopeList(auth),
         tenantId: auth.tenantId,
         clientId: auth.clientId,
         hasRefreshToken: Boolean(auth.refreshToken)
@@ -511,7 +555,7 @@ export function getAuthStatus() {
     tenant_id: auth?.tenantId || null,
     client_id: auth?.clientId || null,
     scope: auth?.scope || null,
-    scope_list: getScopeList(auth?.scope),
+    scope_list: getAvailableScopeList(auth),
     expires_at: auth?.expiresAt || null,
     expires_in_ms: auth?.expiresAt ? auth.expiresAt - Date.now() : null,
     has_refresh_token: Boolean(auth?.refreshToken),

@@ -94,6 +94,33 @@ function buildScopeString(scopes) {
   return [...new Set(scopes)].join(" ")
 }
 
+function decodeJwtPayload(accessToken) {
+  const parts = String(accessToken || "").split(".")
+  if (parts.length < 2) {
+    return null
+  }
+
+  const payload = parts[1]
+  const normalized = payload.replace(/-/g, "+").replace(/_/g, "/")
+  const paddingLength = normalized.length % 4
+  const base64 = paddingLength === 0 ? normalized : normalized + "=".repeat(4 - paddingLength)
+
+  try {
+    return parseJson(Buffer.from(base64, "base64").toString("utf8"))
+  } catch {
+    return null
+  }
+}
+
+function getAccessTokenScopeList(accessToken) {
+  const payload = decodeJwtPayload(accessToken)
+  return getScopeList(payload?.scp)
+}
+
+function getAvailableScopeList(auth) {
+  return getScopeList(buildScopeString([...getScopeList(auth?.scope), ...getAccessTokenScopeList(auth?.accessToken)]))
+}
+
 function mergeScopes(...scopeLists) {
   return buildScopeString(scopeLists.flatMap((scopeList) => scopeList || "").flatMap((value) => getScopeList(value)))
 }
@@ -135,10 +162,16 @@ async function postForm(url, formFields, allowError = false) {
 
 function buildStoredAuth(tokenPayload, tenantId, clientId, scope, previousAuth = null) {
   const expiresIn = Number(tokenPayload.expires_in || 3600)
+  const grantedScope = buildScopeString([
+    ...getScopeList(scope),
+    ...getScopeList(tokenPayload.scope),
+    ...getAccessTokenScopeList(tokenPayload.access_token)
+  ])
+
   return {
     tenantId,
     clientId,
-    scope,
+    scope: grantedScope,
     tokenType: tokenPayload.token_type || "Bearer",
     accessToken: tokenPayload.access_token,
     refreshToken: tokenPayload.refresh_token || previousAuth?.refreshToken || null,
@@ -191,7 +224,8 @@ async function authStart(requestedScopes = DEFAULT_SCOPES) {
 
   try {
     const auth = await getValidAuth()
-    if (auth.clientId === clientId && hasAllScopes(auth.scope, scope)) {
+    const currentScopes = getAvailableScopeList(auth)
+    if (auth.clientId === clientId && hasAllScopes(currentScopes, scope)) {
       console.log(
         JSON.stringify(
           {
@@ -201,7 +235,7 @@ async function authStart(requestedScopes = DEFAULT_SCOPES) {
             clientId: auth.clientId,
             tenantId: auth.tenantId,
             scope: auth.scope,
-            scopeList: getScopeList(auth.scope),
+            scopeList: currentScopes,
             authFile: AUTH_FILE_PATH,
             expiresAt: auth.expiresAt
           },
@@ -306,7 +340,7 @@ async function authPoll() {
             clientId: auth.clientId,
             tenantId: auth.tenantId,
             scope: auth.scope,
-            scopeList: getScopeList(auth.scope),
+            scopeList: getAvailableScopeList(auth),
             expiresAt: auth.expiresAt
           },
           null,
